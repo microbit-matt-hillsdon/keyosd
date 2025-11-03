@@ -103,6 +103,11 @@ export class KeyCastJS {
     ];
 
     modifierKeys.forEach(({ key }) => {
+      // Skip meta/Windows key on non-Mac platforms (not useful for browser shortcuts)
+      if (key === 'meta' && !this.isMac) {
+        return;
+      }
+
       const mod = document.createElement('div');
       mod.className = 'keycastjs-modifier';
       mod.dataset.modifier = key;
