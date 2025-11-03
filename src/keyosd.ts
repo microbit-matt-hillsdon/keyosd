@@ -1,5 +1,94 @@
 import type { KeyOSDOptions, ModifierStates } from './types';
-import './styles.css';
+
+const styles = `
+.keyosd-overlay {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 999999;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 200px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+}
+
+.keyosd-overlay.keyosd-dragging {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  cursor: grabbing;
+}
+
+.keyosd-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  padding: 6px;
+}
+
+.keyosd-display-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.keyosd-display-text {
+  fill: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
+  font-size: 38px;
+  letter-spacing: 0.02em;
+}
+
+.keyosd-modifiers-area {
+  display: flex;
+  height: 30px;
+  justify-content: space-between;
+  align-items: stretch;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.keyosd-modifier {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.keyosd-modifier:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.keyosd-modifier-inner {
+  font-size: 16px;
+  color: #888888;
+  transition: color 0.15s ease;
+  line-height: 1;
+}
+
+.keyosd-modifier-active .keyosd-modifier-inner {
+  color: #ffffff;
+}
+`;
+
+let stylesInjected = false;
+
+function injectStyles() {
+  if (stylesInjected) return;
+  const styleElement = document.createElement('style');
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
+  stylesInjected = true;
+}
 
 export class KeyOSD {
   private container: HTMLElement;
@@ -40,6 +129,8 @@ export class KeyOSD {
   private wasEnabledBeforeFocus: boolean = false;
 
   constructor(options: KeyOSDOptions = {}) {
+    injectStyles();
+
     this.options = {
       container: options.container || document.body,
       enabled: options.enabled ?? true,

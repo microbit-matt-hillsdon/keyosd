@@ -20,10 +20,9 @@ npm install keyosd
 
 ### Standalone (Script Tag)
 
-Just include the standalone script and CSS. KeyOSD will automatically initialize:
+Just include the standalone script. KeyOSD will automatically initialize:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/keyosd/dist/keyosd.css" />
 <script src="https://unpkg.com/keyosd/dist/keyosd.standalone.umd.cjs"></script>
 ```
 
@@ -40,7 +39,7 @@ window.keyosd.clear();
 
 ### As a Module
 
-Import and initialize manually for more control:
+Import and initialize manually for more control (styles are automatically injected):
 
 ```typescript
 import { KeyOSD } from "keyosd";
