@@ -1,16 +1,20 @@
 {
-  "name": "keycastjs",
+  "name": "keyosd",
   "version": "1.0.0",
-  "description": "A minimalist TypeScript library for displaying keystrokes like KeyCastr",
+  "description": "Display keystrokes and shortcuts in an on-screen overlay",
   "type": "module",
-  "main": "./dist/keycastjs.umd.cjs",
-  "module": "./dist/keycastjs.js",
+  "main": "./dist/keyosd.umd.cjs",
+  "module": "./dist/keyosd.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/keycastjs.js",
-      "require": "./dist/keycastjs.umd.cjs",
+      "import": "./dist/keyosd.js",
+      "require": "./dist/keyosd.umd.cjs",
       "types": "./dist/index.d.ts"
+    },
+    "./standalone": {
+      "import": "./dist/keyosd.standalone.js",
+      "require": "./dist/keyosd.standalone.umd.cjs"
     }
   },
   "files": [
@@ -18,7 +22,9 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run build:lib && npm run build:standalone",
+    "build:lib": "tsc && vite build",
+    "build:standalone": "BUILD_MODE=standalone vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -27,8 +33,9 @@
     "vite-plugin-dts": "^3.7.0"
   },
   "keywords": [
-    "keycast",
     "keystroke",
+    "osd",
+    "overlay",
     "visualization",
     "screen-recording",
     "typescript"

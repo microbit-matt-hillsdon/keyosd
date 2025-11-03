@@ -1,58 +1,62 @@
-# KeyCastJS
+# KeyOSD
 
-A minimalist TypeScript library for displaying keystrokes like the Mac app KeyCastr with the Svelte visualizer mode.
+Display keystrokes and shortcuts in an on-screen overlay.
 
 ## Features
 
-- KeyCastr Svelte mode visualization
-- Fixed 200×100px compact display
-- Displays up to 6 characters of recent keystrokes with automatic text scaling (SVG-based)
-- Keystrokes persist and show the most recent input
-- Display clears automatically when modifier keys are pressed/released
-- Persistent modifier key indicators with platform-specific symbols:
-  - **Mac:** ⇧ ⌃ ⌥ ⌘
-  - **Windows:** ⇧ ^ ⎇ ⊞
-- Modifiers shown in both the display area and as hold state indicators
-- Positioned in bottom-right by default (1rem inset)
-- Fixed positioning - stays visible when scrolling
-- Smart corner-relative anchoring - maintains position on window resize
-- Automatic bounds checking - never moves out of viewport
-- Draggable display that can be moved with mouse or touch
-- Touch device support (mobile and tablet)
-- Cross-platform support (Mac, Windows, Linux)
-- Text automatically scales to fit using SVG
-- Minimal padding and no width changes
-- No UI framework dependencies
-- Zero ARIA attributes to avoid screen reader interference
-- TypeScript support with full type definitions
+- Compact visualization inspired by [KeyCastr](https://github.com/keycastr/keycastr)'s Svelte-mode
+- Shows recent keystrokes and keyboard shortcuts
+- Draggable overlay anchors to corners
+- Platform-specific modifier key display
+- Respects keyboard layouts (Chrome/Edge only)
 
 ## Installation
 
 ```bash
-npm install keycastjs
+npm install keyosd
 ```
 
 ## Usage
 
-### Basic Example
+### Standalone (Script Tag)
+
+Just include the standalone script and CSS. KeyOSD will automatically initialize:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/keyosd/dist/keyosd.css" />
+<script src="https://unpkg.com/keyosd/dist/keyosd.standalone.umd.cjs"></script>
+```
+
+The overlay will appear automatically and start capturing keystrokes. Access the instance via `window.keyosd` if you need to control it:
+
+```javascript
+// Disable/enable
+window.keyosd.disable();
+window.keyosd.enable();
+
+// Clear display
+window.keyosd.clear();
+```
+
+### As a Module
+
+Import and initialize manually for more control:
 
 ```typescript
-import { KeyCastJS } from 'keycastjs';
+import { KeyOSD } from "keyosd";
 
 // Initialize with default options
-const keyCast = new KeyCastJS();
+const keyosd = new KeyOSD();
 ```
 
 ### With Options
 
 ```typescript
-import { KeyCastJS } from 'keycastjs';
+import { KeyOSD } from "keyosd";
 
-const keyCast = new KeyCastJS({
-  container: document.body,       // Container element (default: document.body)
-  x: 960,                         // Initial X position (default: bottom-right)
-  y: 800,                         // Initial Y position (default: bottom-right)
-  enabled: true,                  // Start capturing immediately (default: true)
+const keyosd = new KeyOSD({
+  container: document.body, // Container element (default: document.body)
+  enabled: true, // Start capturing immediately (default: true)
 });
 ```
 
@@ -61,47 +65,49 @@ const keyCast = new KeyCastJS({
 ### Constructor
 
 ```typescript
-new KeyCastJS(options?: KeyCastOptions)
+new KeyOSD(options?: KeyOSDOptions)
 ```
 
 ### Methods
 
 #### `enable()`
+
 Start capturing keyboard events.
 
 ```typescript
-keyCast.enable();
+keyosd.enable();
 ```
 
 #### `disable()`
+
 Stop capturing keyboard events.
 
 ```typescript
-keyCast.disable();
+keyosd.disable();
 ```
 
 #### `clear()`
+
 Clear all currently displayed keystrokes.
 
 ```typescript
-keyCast.clear();
+keyosd.clear();
 ```
 
 #### `destroy()`
+
 Remove the visualization and clean up all event listeners.
 
 ```typescript
-keyCast.destroy();
+keyosd.destroy();
 ```
 
 ## Options
 
 ```typescript
-interface KeyCastOptions {
-  container?: HTMLElement;    // Container element (default: document.body)
-  x?: number;                 // Initial X position (default: bottom-right, 1rem inset)
-  y?: number;                 // Initial Y position (default: bottom-right, 1rem inset)
-  enabled?: boolean;          // Start enabled (default: true)
+interface KeyOSDOptions {
+  container?: HTMLElement; // Container element (default: document.body)
+  enabled?: boolean; // Start enabled (default: true)
 }
 ```
 
@@ -117,38 +123,14 @@ interface KeyCastOptions {
 
 ## Keyboard Layout Support
 
-KeyCastJS handles keyboard layouts intelligently based on the context:
+**Normal typing** shows the actual characters you type, respecting your keyboard layout (AZERTY, Dvorak, etc.).
 
-### Normal Typing (No Modifiers or Shift Only)
-Uses the actual character typed (`KeyboardEvent.key`), which respects your keyboard layout:
-- **AZERTY keyboards:** Typing "a" shows "a" (not "q")
-- **Dvorak keyboards:** Shows the actual character you typed
-- **International layouts:** Correctly displays layout-specific characters
+**Keyboard shortcuts** (with Cmd/Ctrl/Alt) work differently:
 
-### Modifier Combinations (⌘/⌃/⎇ + Key)
-Uses physical key positions (`KeyboardEvent.code`) with layout-aware mapping:
-- **Why:** Prevents displaying unintended characters (e.g., Option+C producing "ç" on Mac)
-- **Progressive Enhancement:** Uses `KeyboardLayoutMap` API when available (Chrome/Edge/Opera)
-- **Fallback:** Uses static QWERTY mapping on Firefox/Safari and non-HTTPS contexts
+- **Chrome/Edge/Opera**: Uses your actual keyboard layout. On AZERTY, Cmd+A shows "⌘A" ✓
+- **Firefox/Safari**: Uses QWERTY positions as no keyboard layout API is available.
 
-#### Behavior by Browser:
-
-**Chrome, Edge, Opera (with HTTPS):**
-- Uses `KeyboardLayoutMap` for layout-aware shortcuts
-- **AZERTY keyboard:** Cmd+A displays as "⌘A" (respects layout) ✓
-- **Dvorak keyboard:** Cmd+T displays as "⌘T" (respects layout) ✓
-- **Best experience:** Shortcuts show actual key labels regardless of layout
-
-**Firefox, Safari, HTTP contexts:**
-- Uses static QWERTY-based mapping
-- **AZERTY keyboard:** Cmd+A displays as "⌘Q" (physical QWERTY position)
-- **Still works:** Prevents weird characters, shortcuts remain recognizable
-- **Note:** Firefox and Safari have declined to implement `KeyboardLayoutMap` for privacy reasons (fingerprinting concerns)
-
-This approach is optimized for screencasts and tutorials where:
-- Normal typing should reflect actual keyboard layout
-- Shortcuts should be clearly displayed (layout-aware in Chromium, QWERTY-based elsewhere)
-- The library works universally across all modern browsers
+This prevents displaying unintended characters (like Option+C producing "ç"). There might be a better compromise position here and feedback is welcome.
 
 ## Development
 

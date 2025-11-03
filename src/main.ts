@@ -1,7 +1,6 @@
-import { KeyCastJS } from './KeyCastJS';
+import { KeyOSD } from './keyosd';
 
-// Initialize KeyCastJS
-const keyCast = new KeyCastJS();
+const keyosd = new KeyOSD();
 
 // Setup demo controls
 const toggleBtn = document.getElementById('toggleBtn') as HTMLButtonElement;
@@ -11,16 +10,16 @@ let isEnabled = true;
 
 toggleBtn?.addEventListener('click', () => {
   if (isEnabled) {
-    keyCast.disable();
+    keyosd.disable();
     toggleBtn.textContent = 'Enable';
     isEnabled = false;
   } else {
-    keyCast.enable();
+    keyosd.enable();
     toggleBtn.textContent = 'Disable';
     isEnabled = true;
   }
 });
 
 clearBtn?.addEventListener('click', () => {
-  keyCast.clear();
+  keyosd.clear();
 });

@@ -1,2 +1,2 @@
-export { KeyCastJS } from './KeyCastJS';
-export type { KeyCastOptions } from './types';
+export { KeyOSD } from './keyosd';
+export type { KeyOSDOptions } from './types';

@@ -1,7 +1,7 @@
-import type { KeyCastOptions, ModifierStates } from './types';
+import type { KeyOSDOptions, ModifierStates } from './types';
 import './styles.css';
 
-export class KeyCastJS {
+export class KeyOSD {
   private container: HTMLElement;
   private overlay: HTMLElement;
   private displayArea: HTMLElement;
@@ -13,7 +13,7 @@ export class KeyCastJS {
     alt: false,
     meta: false,
   };
-  private options: Required<KeyCastOptions>;
+  private options: Required<KeyOSDOptions>;
   private isDragging = false;
   private dragOffset = { x: 0, y: 0 };
   private anchorCorner: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' = 'bottom-right';
@@ -39,11 +39,9 @@ export class KeyCastJS {
   private boundBlurHandler: (e: FocusEvent) => void;
   private wasEnabledBeforeFocus: boolean = false;
 
-  constructor(options: KeyCastOptions = {}) {
+  constructor(options: KeyOSDOptions = {}) {
     this.options = {
       container: options.container || document.body,
-      x: options.x ?? -1,
-      y: options.y ?? -1,
       enabled: options.enabled ?? true,
     };
 
@@ -69,26 +67,26 @@ export class KeyCastJS {
 
   private createOverlay(): HTMLElement {
     const overlay = document.createElement('div');
-    overlay.className = 'keycastjs-overlay';
+    overlay.className = 'keyosd-overlay';
     return overlay;
   }
 
   private createDisplayArea(): HTMLElement {
     const display = document.createElement('div');
-    display.className = 'keycastjs-display';
+    display.className = 'keyosd-display';
 
     // Create SVG for auto-scaling text
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 200 60');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    svg.classList.add('keycastjs-display-svg');
+    svg.classList.add('keyosd-display-svg');
 
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', '50%');
     text.setAttribute('y', '50%');
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('dominant-baseline', 'central');
-    text.classList.add('keycastjs-display-text');
+    text.classList.add('keyosd-display-text');
 
     svg.appendChild(text);
     display.appendChild(svg);
@@ -98,7 +96,7 @@ export class KeyCastJS {
 
   private createModifiersArea(): HTMLElement {
     const modifiers = document.createElement('div');
-    modifiers.className = 'keycastjs-modifiers-area';
+    modifiers.className = 'keyosd-modifiers-area';
 
     const modifierKeys = [
       { key: 'shift' as keyof typeof this.modifierSymbols },
@@ -114,11 +112,11 @@ export class KeyCastJS {
       }
 
       const mod = document.createElement('div');
-      mod.className = 'keycastjs-modifier';
+      mod.className = 'keyosd-modifier';
       mod.dataset.modifier = key;
 
       const inner = document.createElement('div');
-      inner.className = 'keycastjs-modifier-inner';
+      inner.className = 'keyosd-modifier-inner';
       inner.textContent = this.modifierSymbols[key];
 
       mod.appendChild(inner);
@@ -136,22 +134,16 @@ export class KeyCastJS {
     // Try to initialize KeyboardLayoutMap (progressive enhancement)
     await this.initKeyboardLayoutMap();
 
-    // Set initial position
-    if (this.options.x === -1 || this.options.y === -1) {
-      // Default to bottom-right with 1rem inset
-      // Use clientWidth/clientHeight to exclude scrollbars
-      const viewportWidth = document.documentElement.clientWidth;
-      const viewportHeight = document.documentElement.clientHeight;
-      const inset = 16; // 1rem = 16px
-      const x = viewportWidth - inset - 100; // 100px is half the overlay width (200px)
-      const y = viewportHeight - inset - 50;  // 50px is half the overlay height (~100px)
-      this.setPosition(x, y);
-      this.anchorCorner = 'bottom-right';
-      this.anchorOffset = { x: inset + 100, y: inset + 50 };
-    } else {
-      this.setPosition(this.options.x, this.options.y);
-      this.updateAnchor();
-    }
+    // Set initial position to bottom-right with 1rem inset
+    // Use clientWidth/clientHeight to exclude scrollbars
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const inset = 16; // 1rem = 16px
+    const x = viewportWidth - inset - 100; // 100px is half the overlay width (200px)
+    const y = viewportHeight - inset - 50;  // 50px is half the overlay height (~100px)
+    this.setPosition(x, y);
+    this.anchorCorner = 'bottom-right';
+    this.anchorOffset = { x: inset + 100, y: inset + 50 };
 
     // Add event listeners
     if (this.options.enabled) {
@@ -461,20 +453,20 @@ export class KeyCastJS {
 
   private render(): void {
     const content = this.keyBuffer.join('');
-    const textElement = this.displayArea.querySelector('.keycastjs-display-text');
+    const textElement = this.displayArea.querySelector('.keyosd-display-text');
     if (textElement) {
       textElement.textContent = content;
     }
   }
 
   private updateModifierDisplay(): void {
-    const modifiers = this.modifiersArea.querySelectorAll('.keycastjs-modifier');
+    const modifiers = this.modifiersArea.querySelectorAll('.keyosd-modifier');
     modifiers.forEach((mod) => {
       const modifierKey = (mod as HTMLElement).dataset.modifier as keyof ModifierStates;
       if (this.modifierStates[modifierKey]) {
-        mod.classList.add('keycastjs-modifier-active');
+        mod.classList.add('keyosd-modifier-active');
       } else {
-        mod.classList.remove('keycastjs-modifier-active');
+        mod.classList.remove('keyosd-modifier-active');
       }
     });
   }
@@ -488,7 +480,7 @@ export class KeyCastJS {
     this.dragOffset.x = e.clientX - currentLeft;
     this.dragOffset.y = e.clientY - currentTop;
 
-    this.overlay.classList.add('keycastjs-dragging');
+    this.overlay.classList.add('keyosd-dragging');
 
     document.addEventListener('mousemove', this.boundMouseMoveHandler);
     document.addEventListener('mouseup', this.boundMouseUpHandler);
@@ -507,7 +499,7 @@ export class KeyCastJS {
 
   private handleMouseUp(): void {
     this.isDragging = false;
-    this.overlay.classList.remove('keycastjs-dragging');
+    this.overlay.classList.remove('keyosd-dragging');
 
     document.removeEventListener('mousemove', this.boundMouseMoveHandler);
     document.removeEventListener('mouseup', this.boundMouseUpHandler);
@@ -526,7 +518,7 @@ export class KeyCastJS {
     this.dragOffset.x = touch.clientX - currentLeft;
     this.dragOffset.y = touch.clientY - currentTop;
 
-    this.overlay.classList.add('keycastjs-dragging');
+    this.overlay.classList.add('keyosd-dragging');
 
     document.addEventListener('touchmove', this.boundTouchMoveHandler, { passive: false });
     document.addEventListener('touchend', this.boundTouchEndHandler);
@@ -547,7 +539,7 @@ export class KeyCastJS {
 
   private handleTouchEnd(): void {
     this.isDragging = false;
-    this.overlay.classList.remove('keycastjs-dragging');
+    this.overlay.classList.remove('keyosd-dragging');
 
     document.removeEventListener('touchmove', this.boundTouchMoveHandler);
     document.removeEventListener('touchend', this.boundTouchEndHandler);
@@ -617,7 +609,7 @@ export class KeyCastJS {
 
   public clear(): void {
     this.keyBuffer = [];
-    const textElement = this.displayArea.querySelector('.keycastjs-display-text');
+    const textElement = this.displayArea.querySelector('.keyosd-display-text');
     if (textElement) {
       textElement.textContent = '';
     }
