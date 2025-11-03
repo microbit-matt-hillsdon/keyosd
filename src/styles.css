@@ -41,24 +41,36 @@
 
 .keycastjs-modifiers-area {
   display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding-top: 3px;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   flex-shrink: 0;
+  height: 30px;
 }
 
 .keycastjs-modifier {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 400;
-  color: #ffffff;
-  opacity: 0.25;
-  transition: opacity 0.15s ease;
-  min-width: 18px;
+  color: #888888;
+  transition: color 0.15s ease;
+  flex: 1;
   text-align: center;
   line-height: 1;
+  position: relative;
+}
+
+.keycastjs-modifier:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 16px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .keycastjs-modifier-active {
-  opacity: 1;
+  color: #ffffff;
 }
