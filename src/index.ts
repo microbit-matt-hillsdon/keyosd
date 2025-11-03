@@ -1,2 +1,2 @@
-export { KeyOSD } from './keyosd';
-export type { KeyOSDOptions } from './types';
+export { KeyOSD } from "./keyosd";
+export type { KeyOSDOptions } from "./types";

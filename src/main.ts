@@ -1,25 +1,25 @@
-import { KeyOSD } from './keyosd';
+import { KeyOSD } from "./keyosd";
 
 const keyosd = new KeyOSD();
 
 // Setup demo controls
-const toggleBtn = document.getElementById('toggleBtn') as HTMLButtonElement;
-const clearBtn = document.getElementById('clearBtn') as HTMLButtonElement;
+const toggleBtn = document.getElementById("toggleBtn") as HTMLButtonElement;
+const clearBtn = document.getElementById("clearBtn") as HTMLButtonElement;
 
 let isEnabled = true;
 
-toggleBtn?.addEventListener('click', () => {
+toggleBtn?.addEventListener("click", () => {
   if (isEnabled) {
     keyosd.disable();
-    toggleBtn.textContent = 'Enable';
+    toggleBtn.textContent = "Enable";
     isEnabled = false;
   } else {
     keyosd.enable();
-    toggleBtn.textContent = 'Disable';
+    toggleBtn.textContent = "Disable";
     isEnabled = true;
   }
 });
 
-clearBtn?.addEventListener('click', () => {
+clearBtn?.addEventListener("click", () => {
   keyosd.clear();
 });
