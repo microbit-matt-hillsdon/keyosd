@@ -105,7 +105,12 @@ export class KeyCastJS {
       const mod = document.createElement('div');
       mod.className = 'keycastjs-modifier';
       mod.dataset.modifier = key;
-      mod.textContent = this.modifierSymbols[key];
+
+      const inner = document.createElement('div');
+      inner.className = 'keycastjs-modifier-inner';
+      inner.textContent = this.modifierSymbols[key];
+
+      mod.appendChild(inner);
       modifiers.appendChild(mod);
     });
 

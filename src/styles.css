@@ -5,7 +5,6 @@
   cursor: move;
   user-select: none;
   touch-action: none;
-  padding: 6px;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 12px;
   backdrop-filter: blur(10px);
@@ -16,7 +15,6 @@
   height: 100px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
 .keycastjs-overlay.keycastjs-dragging {
@@ -31,6 +29,7 @@
   justify-content: center;
   overflow: hidden;
   width: 100%;
+  padding: 6px;
 }
 
 .keycastjs-display-svg {
@@ -48,34 +47,26 @@
 
 .keycastjs-modifiers-area {
   display: flex;
+  height: 30px;
   justify-content: space-between;
-  align-items: center;
-  padding-top: 6px;
+  align-items: stretch;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   flex-shrink: 0;
-  height: 30px;
 }
 
 .keycastjs-modifier {
-  font-size: 18px;
-  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
   color: #888888;
   transition: color 0.15s ease;
   flex: 1;
-  text-align: center;
   line-height: 1;
-  position: relative;
 }
 
-.keycastjs-modifier:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 16px;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.15);
+.keycastjs-modifier:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .keycastjs-modifier-active {
