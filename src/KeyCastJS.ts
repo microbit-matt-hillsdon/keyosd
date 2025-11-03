@@ -25,6 +25,7 @@ export class KeyCastJS {
     alt: this.isMac ? '⌥' : '⎇',
     meta: this.isMac ? '⌘' : '⊞',
   };
+  private keyboardLayoutMap: any = null; // KeyboardLayoutMap (if available)
   private boundKeyDownHandler: (e: KeyboardEvent) => void;
   private boundKeyUpHandler: (e: KeyboardEvent) => void;
   private boundMouseDownHandler: (e: MouseEvent) => void;
@@ -117,10 +118,13 @@ export class KeyCastJS {
     return modifiers;
   }
 
-  private init(): void {
+  private async init(): Promise<void> {
     this.overlay.appendChild(this.displayArea);
     this.overlay.appendChild(this.modifiersArea);
     this.container.appendChild(this.overlay);
+
+    // Try to initialize KeyboardLayoutMap (progressive enhancement)
+    await this.initKeyboardLayoutMap();
 
     // Set initial position
     if (this.options.x === -1 || this.options.y === -1) {
@@ -147,6 +151,18 @@ export class KeyCastJS {
     this.overlay.addEventListener('mousedown', this.boundMouseDownHandler);
     this.overlay.addEventListener('touchstart', this.boundTouchStartHandler, { passive: false });
     window.addEventListener('resize', this.boundResizeHandler);
+  }
+
+  private async initKeyboardLayoutMap(): Promise<void> {
+    try {
+      // Check if Keyboard API is available (Chromium-only feature)
+      if ('keyboard' in navigator && 'getLayoutMap' in (navigator as any).keyboard) {
+        this.keyboardLayoutMap = await (navigator as any).keyboard.getLayoutMap();
+      }
+    } catch (error) {
+      // Silently fall back if KeyboardLayoutMap is not available or fails
+      // This is expected on Firefox, Safari, and non-HTTPS contexts
+    }
   }
 
   private setPosition(x: number, y: number): void {
@@ -239,6 +255,68 @@ export class KeyCastJS {
     this.setPosition(x, y);
   }
 
+  private codeToKey(code: string, uppercase: boolean = false): string | null {
+    // Try KeyboardLayoutMap first (progressive enhancement for Chromium)
+    if (this.keyboardLayoutMap) {
+      const layoutKey = this.keyboardLayoutMap.get(code);
+      if (layoutKey) {
+        // Normalize special keys
+        let key: string;
+        switch (layoutKey) {
+          case ' ':
+            key = '␣';
+            break;
+          default:
+            key = layoutKey;
+        }
+        // Apply uppercasing if requested and it's a single character
+        if (uppercase && key.length === 1) {
+          return key.toUpperCase();
+        }
+        return key;
+      }
+    }
+
+    // Fallback: Use static mapping (works on all browsers)
+    // Handle letter keys (KeyA-KeyZ)
+    if (code.startsWith('Key') && code.length === 4) {
+      const letter = code.charAt(3); // Extract letter
+      return uppercase ? letter : letter;
+    }
+
+    // Handle digit keys (Digit0-Digit9)
+    if (code.startsWith('Digit') && code.length === 6) {
+      return code.charAt(5); // Extract digit
+    }
+
+    // Handle punctuation and special keys
+    const codeMap: Record<string, string> = {
+      'Space': '␣',
+      'Minus': '-',
+      'Equal': '=',
+      'BracketLeft': '[',
+      'BracketRight': ']',
+      'Backslash': '\\',
+      'Semicolon': ';',
+      'Quote': "'",
+      'Comma': ',',
+      'Period': '.',
+      'Slash': '/',
+      'Backquote': '`',
+      'ArrowUp': '↑',
+      'ArrowDown': '↓',
+      'ArrowLeft': '←',
+      'ArrowRight': '→',
+      'Enter': '↵',
+      'Backspace': '⌫',
+      'Delete': '⌦',
+      'Escape': '⎋',
+      'Tab': '⇥',
+    };
+
+    return codeMap[code] || null;
+  }
+
   private handleKeyDown(e: KeyboardEvent): void {
     // Check if modifier state changed
     const prevShift = this.modifierStates.shift;
@@ -263,40 +341,53 @@ export class KeyCastJS {
     // Ignore key repeats
     if (e.repeat) return;
 
-    let key = e.key;
+    const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
 
-    // Normalize key names
-    switch (key) {
-      case ' ':
-        key = '␣';
-        break;
-      case 'ArrowUp':
-        key = '↑';
-        break;
-      case 'ArrowDown':
-        key = '↓';
-        break;
-      case 'ArrowLeft':
-        key = '←';
-        break;
-      case 'ArrowRight':
-        key = '→';
-        break;
-      case 'Enter':
-        key = '↵';
-        break;
-      case 'Backspace':
-        key = '⌫';
-        break;
-      case 'Delete':
-        key = '⌦';
-        break;
-      case 'Escape':
-        key = '⎋';
-        break;
-      case 'Tab':
-        key = '⇥';
-        break;
+    let key: string;
+
+    // For modifier combinations, use e.code to avoid weird characters (e.g., Option+C = "ç")
+    // For normal typing, use e.key to respect keyboard layout (AZERTY, Dvorak, etc.)
+    if (hasModifier) {
+      // Pass true for uppercase parameter when used with modifiers
+      const mappedKey = this.codeToKey(e.code, true);
+      if (!mappedKey) return; // Ignore unmapped keys
+      key = mappedKey;
+    } else {
+      key = e.key;
+
+      // Normalize key names for normal typing
+      switch (key) {
+        case ' ':
+          key = '␣';
+          break;
+        case 'ArrowUp':
+          key = '↑';
+          break;
+        case 'ArrowDown':
+          key = '↓';
+          break;
+        case 'ArrowLeft':
+          key = '←';
+          break;
+        case 'ArrowRight':
+          key = '→';
+          break;
+        case 'Enter':
+          key = '↵';
+          break;
+        case 'Backspace':
+          key = '⌫';
+          break;
+        case 'Delete':
+          key = '⌦';
+          break;
+        case 'Escape':
+          key = '⎋';
+          break;
+        case 'Tab':
+          key = '⇥';
+          break;
+      }
     }
 
     // Don't display modifier keys by themselves
@@ -306,19 +397,14 @@ export class KeyCastJS {
 
     // Build the display string with modifiers
     let displayStr = '';
-    const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
 
     if (e.metaKey) displayStr += this.modifierSymbols.meta;
     if (e.ctrlKey) displayStr += this.modifierSymbols.ctrl;
     if (e.altKey) displayStr += this.modifierSymbols.alt;
     if (e.shiftKey) displayStr += this.modifierSymbols.shift;
 
-    // Uppercase single-character keys when used with modifiers (not shift alone)
-    if (hasModifier && key.length === 1) {
-      displayStr += key.toUpperCase();
-    } else {
-      displayStr += key;
-    }
+    // Add the key (already uppercased if hasModifier was true)
+    displayStr += key;
 
     this.addToBuffer(displayStr);
   }

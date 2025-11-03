@@ -115,6 +115,41 @@ interface KeyCastOptions {
 - **Bounds checking:** Automatically constrains position within viewport
 - **Draggable:** Click and drag to reposition anywhere on screen
 
+## Keyboard Layout Support
+
+KeyCastJS handles keyboard layouts intelligently based on the context:
+
+### Normal Typing (No Modifiers or Shift Only)
+Uses the actual character typed (`KeyboardEvent.key`), which respects your keyboard layout:
+- **AZERTY keyboards:** Typing "a" shows "a" (not "q")
+- **Dvorak keyboards:** Shows the actual character you typed
+- **International layouts:** Correctly displays layout-specific characters
+
+### Modifier Combinations (⌘/⌃/⎇ + Key)
+Uses physical key positions (`KeyboardEvent.code`) with layout-aware mapping:
+- **Why:** Prevents displaying unintended characters (e.g., Option+C producing "ç" on Mac)
+- **Progressive Enhancement:** Uses `KeyboardLayoutMap` API when available (Chrome/Edge/Opera)
+- **Fallback:** Uses static QWERTY mapping on Firefox/Safari and non-HTTPS contexts
+
+#### Behavior by Browser:
+
+**Chrome, Edge, Opera (with HTTPS):**
+- Uses `KeyboardLayoutMap` for layout-aware shortcuts
+- **AZERTY keyboard:** Cmd+A displays as "⌘A" (respects layout) ✓
+- **Dvorak keyboard:** Cmd+T displays as "⌘T" (respects layout) ✓
+- **Best experience:** Shortcuts show actual key labels regardless of layout
+
+**Firefox, Safari, HTTP contexts:**
+- Uses static QWERTY-based mapping
+- **AZERTY keyboard:** Cmd+A displays as "⌘Q" (physical QWERTY position)
+- **Still works:** Prevents weird characters, shortcuts remain recognizable
+- **Note:** Firefox and Safari have declined to implement `KeyboardLayoutMap` for privacy reasons (fingerprinting concerns)
+
+This approach is optimized for screencasts and tutorials where:
+- Normal typing should reflect actual keyboard layout
+- Shortcuts should be clearly displayed (layout-aware in Chromium, QWERTY-based elsewhere)
+- The library works universally across all modern browsers
+
 ## Development
 
 ```bash
