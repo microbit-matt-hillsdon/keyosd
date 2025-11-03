@@ -1,5 +1,7 @@
 # KeyOSD
 
+**Warning: This is very much a mostly-AI-coded first draft**
+
 Display keystrokes and shortcuts in an on-screen overlay inside a web app.
 
 Built for user testing keyboard interactions in an environment where installing
