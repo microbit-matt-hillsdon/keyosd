@@ -11,6 +11,9 @@ A minimalist TypeScript library for displaying keystrokes like the Mac app KeyCa
 - Display clears automatically when modifier keys are pressed/released
 - Persistent modifier key indicators (⇧ ⌃ ⌥ ⌘)
 - Modifiers shown in both the display area and as hold state indicators
+- Positioned in bottom-right by default (1rem inset)
+- Fixed positioning - stays visible when scrolling
+- Automatic bounds checking - never moves out of viewport
 - Draggable display that can be moved with mouse or touch
 - Touch device support (mobile and tablet)
 - Text starts large and shrinks to fit as more characters appear
@@ -43,8 +46,8 @@ import { KeyCastJS } from 'keycastjs';
 
 const keyCast = new KeyCastJS({
   container: document.body,       // Container element (default: document.body)
-  x: 960,                         // Initial X position (default: center-bottom)
-  y: 800,                         // Initial Y position (default: center-bottom)
+  x: 960,                         // Initial X position (default: bottom-right)
+  y: 800,                         // Initial Y position (default: bottom-right)
   enabled: true,                  // Start capturing immediately (default: true)
 });
 ```
@@ -92,11 +95,18 @@ keyCast.destroy();
 ```typescript
 interface KeyCastOptions {
   container?: HTMLElement;    // Container element (default: document.body)
-  x?: number;                 // Initial X position (default: center-bottom)
-  y?: number;                 // Initial Y position (default: center-bottom)
+  x?: number;                 // Initial X position (default: bottom-right, 1rem inset)
+  y?: number;                 // Initial Y position (default: bottom-right, 1rem inset)
   enabled?: boolean;          // Start enabled (default: true)
 }
 ```
+
+## Positioning
+
+- **Default position:** Bottom-right corner with 1rem (16px) inset
+- **Fixed positioning:** Stays visible when scrolling
+- **Bounds checking:** Automatically constrains position within viewport on window resize
+- **Draggable:** Click and drag to reposition anywhere on screen
 
 ## Development
 

@@ -24,6 +24,7 @@ export class KeyCastJS {
   private boundTouchStartHandler: (e: TouchEvent) => void;
   private boundTouchMoveHandler: (e: TouchEvent) => void;
   private boundTouchEndHandler: () => void;
+  private boundResizeHandler: () => void;
 
   constructor(options: KeyCastOptions = {}) {
     this.options = {
@@ -46,6 +47,7 @@ export class KeyCastJS {
     this.boundTouchStartHandler = this.handleTouchStart.bind(this);
     this.boundTouchMoveHandler = this.handleTouchMove.bind(this);
     this.boundTouchEndHandler = this.handleTouchEnd.bind(this);
+    this.boundResizeHandler = this.handleResize.bind(this);
 
     this.init();
   }
@@ -91,10 +93,11 @@ export class KeyCastJS {
 
     // Set initial position
     if (this.options.x === -1 || this.options.y === -1) {
-      // Default to bottom-center
+      // Default to bottom-right with 1rem inset
+      const inset = 16; // 1rem = 16px
       this.setPosition(
-        window.innerWidth / 2,
-        window.innerHeight - 150
+        window.innerWidth - inset - 100, // 100px is half the overlay width (200px)
+        window.innerHeight - inset - 50  // 50px is half the overlay height (~100px)
       );
     } else {
       this.setPosition(this.options.x, this.options.y);
@@ -107,11 +110,37 @@ export class KeyCastJS {
 
     this.overlay.addEventListener('mousedown', this.boundMouseDownHandler);
     this.overlay.addEventListener('touchstart', this.boundTouchStartHandler, { passive: false });
+    window.addEventListener('resize', this.boundResizeHandler);
   }
 
   private setPosition(x: number, y: number): void {
-    this.overlay.style.left = `${x}px`;
-    this.overlay.style.top = `${y}px`;
+    const constrained = this.constrainPosition(x, y);
+    this.overlay.style.left = `${constrained.x}px`;
+    this.overlay.style.top = `${constrained.y}px`;
+  }
+
+  private constrainPosition(x: number, y: number): { x: number; y: number } {
+    // Get overlay dimensions (200px width, ~100px height)
+    const overlayWidth = 200;
+    const overlayHeight = 100;
+
+    // Calculate bounds considering the transform translate(-50%, -50%)
+    const minX = overlayWidth / 2;
+    const maxX = window.innerWidth - overlayWidth / 2;
+    const minY = overlayHeight / 2;
+    const maxY = window.innerHeight - overlayHeight / 2;
+
+    return {
+      x: Math.max(minX, Math.min(maxX, x)),
+      y: Math.max(minY, Math.min(maxY, y))
+    };
+  }
+
+  private handleResize(): void {
+    // Re-constrain position on window resize
+    const currentLeft = parseFloat(this.overlay.style.left) || 0;
+    const currentTop = parseFloat(this.overlay.style.top) || 0;
+    this.setPosition(currentLeft, currentTop);
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
@@ -362,6 +391,7 @@ export class KeyCastJS {
     document.removeEventListener('mouseup', this.boundMouseUpHandler);
     document.removeEventListener('touchmove', this.boundTouchMoveHandler);
     document.removeEventListener('touchend', this.boundTouchEndHandler);
+    window.removeEventListener('resize', this.boundResizeHandler);
     this.overlay.remove();
   }
 
