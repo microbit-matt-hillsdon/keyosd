@@ -13,6 +13,9 @@ export class KeyCastJS {
   private boundMouseDownHandler: (e: MouseEvent) => void;
   private boundMouseMoveHandler: (e: MouseEvent) => void;
   private boundMouseUpHandler: () => void;
+  private boundTouchStartHandler: (e: TouchEvent) => void;
+  private boundTouchMoveHandler: (e: TouchEvent) => void;
+  private boundTouchEndHandler: () => void;
 
   constructor(options: KeyCastOptions = {}) {
     this.options = {
@@ -32,6 +35,9 @@ export class KeyCastJS {
     this.boundMouseDownHandler = this.handleMouseDown.bind(this);
     this.boundMouseMoveHandler = this.handleMouseMove.bind(this);
     this.boundMouseUpHandler = this.handleMouseUp.bind(this);
+    this.boundTouchStartHandler = this.handleTouchStart.bind(this);
+    this.boundTouchMoveHandler = this.handleTouchMove.bind(this);
+    this.boundTouchEndHandler = this.handleTouchEnd.bind(this);
 
     this.init();
   }
@@ -69,6 +75,7 @@ export class KeyCastJS {
     }
 
     this.overlay.addEventListener('mousedown', this.boundMouseDownHandler);
+    this.overlay.addEventListener('touchstart', this.boundTouchStartHandler, { passive: false });
   }
 
   private setPosition(x: number, y: number): void {
@@ -201,9 +208,10 @@ export class KeyCastJS {
     if (e.button !== 0) return; // Only left click
 
     this.isDragging = true;
-    const rect = this.overlay.getBoundingClientRect();
-    this.dragOffset.x = e.clientX - rect.left;
-    this.dragOffset.y = e.clientY - rect.top;
+    const currentLeft = parseFloat(this.overlay.style.left) || 0;
+    const currentTop = parseFloat(this.overlay.style.top) || 0;
+    this.dragOffset.x = e.clientX - currentLeft;
+    this.dragOffset.y = e.clientY - currentTop;
 
     this.overlay.classList.add('keycastjs-dragging');
 
@@ -230,6 +238,43 @@ export class KeyCastJS {
     document.removeEventListener('mouseup', this.boundMouseUpHandler);
   }
 
+  private handleTouchStart(e: TouchEvent): void {
+    if (e.touches.length !== 1) return; // Only single touch
+
+    this.isDragging = true;
+    const touch = e.touches[0];
+    const currentLeft = parseFloat(this.overlay.style.left) || 0;
+    const currentTop = parseFloat(this.overlay.style.top) || 0;
+    this.dragOffset.x = touch.clientX - currentLeft;
+    this.dragOffset.y = touch.clientY - currentTop;
+
+    this.overlay.classList.add('keycastjs-dragging');
+
+    document.addEventListener('touchmove', this.boundTouchMoveHandler, { passive: false });
+    document.addEventListener('touchend', this.boundTouchEndHandler);
+
+    e.preventDefault();
+  }
+
+  private handleTouchMove(e: TouchEvent): void {
+    if (!this.isDragging || e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    const x = touch.clientX - this.dragOffset.x;
+    const y = touch.clientY - this.dragOffset.y;
+
+    this.setPosition(x, y);
+    e.preventDefault();
+  }
+
+  private handleTouchEnd(): void {
+    this.isDragging = false;
+    this.overlay.classList.remove('keycastjs-dragging');
+
+    document.removeEventListener('touchmove', this.boundTouchMoveHandler);
+    document.removeEventListener('touchend', this.boundTouchEndHandler);
+  }
+
   public enable(): void {
     this.options.enabled = true;
     document.addEventListener('keydown', this.boundKeyDownHandler);
@@ -243,8 +288,11 @@ export class KeyCastJS {
   public destroy(): void {
     this.disable();
     this.overlay.removeEventListener('mousedown', this.boundMouseDownHandler);
+    this.overlay.removeEventListener('touchstart', this.boundTouchStartHandler);
     document.removeEventListener('mousemove', this.boundMouseMoveHandler);
     document.removeEventListener('mouseup', this.boundMouseUpHandler);
+    document.removeEventListener('touchmove', this.boundTouchMoveHandler);
+    document.removeEventListener('touchend', this.boundTouchEndHandler);
     this.overlay.remove();
   }
 

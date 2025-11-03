@@ -4,6 +4,7 @@
   z-index: 999999;
   cursor: move;
   user-select: none;
+  touch-action: none;
   padding: 16px 24px;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 12px;

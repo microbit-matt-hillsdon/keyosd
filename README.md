@@ -5,7 +5,8 @@ A minimalist TypeScript library for displaying keystrokes like the Mac app KeyCa
 ## Features
 
 - Clean, minimalist keystroke visualization
-- Draggable display that can be moved with the mouse
+- Draggable display that can be moved with mouse or touch
+- Touch device support (mobile and tablet)
 - Shows modifier keys (⌘, ⌃, ⌥, ⇧) separately
 - Smooth animations for key presses and removals
 - No UI framework dependencies
