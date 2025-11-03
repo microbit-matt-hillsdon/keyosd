@@ -13,142 +13,170 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #f5f5f5;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #1a1a1a;
       padding: 40px 20px;
     }
 
     .container {
-      max-width: 800px;
-      text-align: center;
+      max-width: 600px;
+      width: 100%;
     }
 
     h1 {
       font-size: 48px;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
       font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
     }
 
-    p {
-      font-size: 20px;
+    .tagline {
+      font-size: 18px;
       margin-bottom: 32px;
-      opacity: 0.9;
+      color: #666;
+      text-align: center;
     }
 
     .demo-area {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 40px;
-      backdrop-filter: blur(10px);
-      margin-bottom: 32px;
-    }
-
-    .demo-area h2 {
-      font-size: 24px;
-      margin-bottom: 16px;
-    }
-
-    .demo-area p {
-      font-size: 16px;
-      margin-bottom: 24px;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: white;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      color: #1a1a1a;
       margin-bottom: 16px;
       font-family: inherit;
+      resize: vertical;
     }
 
-    input::placeholder,
     textarea::placeholder {
-      color: rgba(255, 255, 255, 0.5);
+      color: #999;
     }
 
-    input:focus,
     textarea:focus {
       outline: none;
-      border-color: rgba(255, 255, 255, 0.6);
+      border-color: #4a90e2;
     }
 
     .controls {
       display: flex;
       gap: 12px;
       justify-content: center;
-      flex-wrap: wrap;
     }
 
     button {
-      padding: 12px 24px;
+      padding: 10px 20px;
       font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
+      font-weight: 500;
+      border: 2px solid #1a1a1a;
+      border-radius: 4px;
       background: white;
-      color: #667eea;
+      color: #1a1a1a;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    button.secondary {
-      background: rgba(255, 255, 255, 0.2);
+      background: #1a1a1a;
       color: white;
     }
 
-    .info {
-      font-size: 14px;
-      opacity: 0.8;
-      margin-top: 32px;
+    button:focus-visible {
+      outline: 3px solid #4a90e2;
+      outline-offset: 2px;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.secondary {
+      background: #1a1a1a;
+      color: white;
+    }
+
+    button.secondary:hover {
+      background: #333;
+    }
+
+    .features {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .features h2 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+
+    .features ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .features li {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .features li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #4a90e2;
+      font-weight: bold;
+    }
+
+    .features li:last-child {
+      margin-bottom: 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>KeyCastJS</h1>
-    <p>A minimalist TypeScript library for displaying keystrokes</p>
+    <p class="tagline">Display keystrokes like KeyCastr's Svelte mode</p>
 
     <div class="demo-area">
-      <h2>Try it out!</h2>
-      <p>Type anywhere to see your keystrokes in KeyCastr Svelte mode. Drag to move.</p>
-
-      <input type="text" placeholder="Type here...">
-      <textarea rows="4" placeholder="Or type in a multiline field..."></textarea>
+      <textarea rows="6" placeholder="Type here to see your keystrokes displayed..."></textarea>
 
       <div class="controls">
         <button id="toggleBtn">Disable</button>
-        <button id="clearBtn" class="secondary">Clear Display</button>
+        <button id="clearBtn" class="secondary">Clear</button>
       </div>
     </div>
 
-    <div class="info">
-      <p><strong>Features:</strong></p>
-      <p>• Fixed 200×100px compact display in bottom-right corner</p>
-      <p>• Drag to reposition - automatically anchors to nearest corner</p>
-      <p>• Stays visible when scrolling, maintains position on window resize</p>
-      <p>• Up to 6 characters of output with automatic SVG text scaling</p>
-      <p>• Display clears when modifier keys are pressed/released</p>
-      <p>• Platform-specific modifier keys (Mac: ⇧⌃⌥⌘, Windows: ⇧^⎇⊞)</p>
-      <p>• Hold modifiers to see indicators light up below</p>
-      <p>• Modifier combos appear in display (e.g., ⌘C or ^C)</p>
+    <div class="features">
+      <h2>Features</h2>
+      <ul>
+        <li>Shows recent keystrokes and keyboard shortcuts</li>
+        <li>Draggable overlay anchors to corners</li>
+        <li>Platform-specific modifier key display</li>
+        <li>Respects keyboard layouts (Chrome/Edge only)</li>
+      </ul>
     </div>
   </div>
 
