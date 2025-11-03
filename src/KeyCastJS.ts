@@ -35,6 +35,9 @@ export class KeyCastJS {
   private boundTouchMoveHandler: (e: TouchEvent) => void;
   private boundTouchEndHandler: () => void;
   private boundResizeHandler: () => void;
+  private boundFocusHandler: (e: FocusEvent) => void;
+  private boundBlurHandler: (e: FocusEvent) => void;
+  private wasEnabledBeforeFocus: boolean = false;
 
   constructor(options: KeyCastOptions = {}) {
     this.options = {
@@ -58,6 +61,8 @@ export class KeyCastJS {
     this.boundTouchMoveHandler = this.handleTouchMove.bind(this);
     this.boundTouchEndHandler = this.handleTouchEnd.bind(this);
     this.boundResizeHandler = this.handleResize.bind(this);
+    this.boundFocusHandler = this.handleFocus.bind(this);
+    this.boundBlurHandler = this.handleBlur.bind(this);
 
     this.init();
   }
@@ -156,6 +161,8 @@ export class KeyCastJS {
     this.overlay.addEventListener('mousedown', this.boundMouseDownHandler);
     this.overlay.addEventListener('touchstart', this.boundTouchStartHandler, { passive: false });
     window.addEventListener('resize', this.boundResizeHandler);
+    document.addEventListener('focusin', this.boundFocusHandler);
+    document.addEventListener('focusout', this.boundBlurHandler);
   }
 
   private async initKeyboardLayoutMap(): Promise<void> {
@@ -549,14 +556,47 @@ export class KeyCastJS {
     this.updateAnchor();
   }
 
+  private isSecuritySensitiveField(element: HTMLElement): boolean {
+    if (!(element instanceof HTMLInputElement)) return false;
+
+    if (element.type === 'password') return true;
+
+    const autocomplete = element.autocomplete?.toLowerCase();
+    if (autocomplete && ['current-password', 'new-password'].includes(autocomplete)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private handleFocus(e: FocusEvent): void {
+    if (e.target && this.isSecuritySensitiveField(e.target as HTMLElement)) {
+      this.wasEnabledBeforeFocus = this.options.enabled;
+      if (this.wasEnabledBeforeFocus) {
+        this.disable();
+      }
+    }
+  }
+
+  private handleBlur(e: FocusEvent): void {
+    if (e.target && this.isSecuritySensitiveField(e.target as HTMLElement)) {
+      if (this.wasEnabledBeforeFocus) {
+        this.enable();
+      }
+    }
+  }
+
   public enable(): void {
     this.options.enabled = true;
+    this.overlay.style.display = '';
     document.addEventListener('keydown', this.boundKeyDownHandler);
     document.addEventListener('keyup', this.boundKeyUpHandler);
   }
 
   public disable(): void {
     this.options.enabled = false;
+    this.clear();
+    this.overlay.style.display = 'none';
     document.removeEventListener('keydown', this.boundKeyDownHandler);
     document.removeEventListener('keyup', this.boundKeyUpHandler);
   }
@@ -570,6 +610,8 @@ export class KeyCastJS {
     document.removeEventListener('touchmove', this.boundTouchMoveHandler);
     document.removeEventListener('touchend', this.boundTouchEndHandler);
     window.removeEventListener('resize', this.boundResizeHandler);
+    document.removeEventListener('focusin', this.boundFocusHandler);
+    document.removeEventListener('focusout', this.boundBlurHandler);
     this.overlay.remove();
   }
 
