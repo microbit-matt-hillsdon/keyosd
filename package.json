@@ -1,0 +1,38 @@
+{
+  "name": "keycastjs",
+  "version": "1.0.0",
+  "description": "A minimalist TypeScript library for displaying keystrokes like KeyCastr",
+  "type": "module",
+  "main": "./dist/keycastjs.umd.cjs",
+  "module": "./dist/keycastjs.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/keycastjs.js",
+      "require": "./dist/keycastjs.umd.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vite-plugin-dts": "^3.7.0"
+  },
+  "keywords": [
+    "keycast",
+    "keystroke",
+    "visualization",
+    "screen-recording",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}
