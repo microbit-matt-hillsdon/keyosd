@@ -15,7 +15,7 @@ You can:
 Bookmarklet:
 
 ```
-javascript:(()=>(document.body.appendChild(document.createElement("script")).src = "http://localhost:3000/keyosd.standalone.js"))()
+javascript:(()=>(document.body.appendChild(document.createElement("script")).src = "https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"))()
 ```
 
 ## Features
@@ -37,7 +37,7 @@ npm install keyosd
 Just include the standalone script. KeyOSD will automatically initialize:
 
 ```html
-<script src="https://unpkg.com/keyosd/dist/keyosd.standalone.umd.cjs"></script>
+<script src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"></script>
 ```
 
 The overlay will appear automatically and start capturing keystrokes. Access the instance via `window.keyosd` if you need to control it:
@@ -52,6 +52,8 @@ window.keyosd.clear();
 ```
 
 ### As a Module
+
+**Not yet published to NPM**
 
 Import and initialize manually for more control (styles are automatically injected):
 
