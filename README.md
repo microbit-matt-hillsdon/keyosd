@@ -1,14 +1,26 @@
 # KeyOSD
 
-Display keystrokes and shortcuts in an on-screen overlay.
+Display keystrokes and shortcuts in an on-screen overlay inside a web app.
+
+Built for user testing keyboard interactions in an environment where installing
+tools like [KeyCastr](https://github.com/keycastr/keycastr) is not viable.
+
+You can:
+
+- Integrate it in your app (e.g. via a feature flag)
+- For ad hoc testing, use a bookmarklet to run it in a page you don't control
+
+Bookmarklet:
+
+```
+javascript:(()=>(document.body.appendChild(document.createElement("script")).src = "http://localhost:3000/keyosd.standalone.js"))()
+```
 
 ## Features
 
-- Compact visualization inspired by [KeyCastr](https://github.com/keycastr/keycastr)'s Svelte-mode
 - Shows recent keystrokes and keyboard shortcuts
-- Draggable overlay anchors to corners
-- Platform-specific modifier key display
-- Respects keyboard layouts (Chrome/Edge only)
+- Compact visualization inspired by [KeyCastr](https://github.com/keycastr/keycastr)'s Svelte-mode
+- Draggable to move away from user interface elements as needed
 
 ## Installation
 
@@ -110,26 +122,16 @@ interface KeyOSDOptions {
 }
 ```
 
-## Positioning
-
-- **Default position:** Bottom-right corner with 1rem (16px) inset
-- **Scrollbar-aware:** Accounts for scrollbar presence when positioning
-- **Fixed positioning:** Stays visible when scrolling
-- **Corner-relative anchoring:** When dragged, automatically anchors to the nearest corner
-- **Smart resize behavior:** Maintains position relative to its anchor corner when window resizes
-- **Bounds checking:** Automatically constrains position within viewport
-- **Draggable:** Click and drag to reposition anywhere on screen
-
 ## Keyboard Layout Support
 
-**Normal typing** shows the actual characters you type, respecting your keyboard layout (AZERTY, Dvorak, etc.).
+**Normal typing** shows the actual characters you type, respecting your keyboard layout (AZERTY, Dvorak, etc.)
 
 **Keyboard shortcuts** (with Cmd/Ctrl/Alt) work differently:
 
 - **Chrome/Edge/Opera**: Uses your actual keyboard layout. On AZERTY, Cmd+A shows "⌘A" ✓
 - **Firefox/Safari**: Uses QWERTY positions as no keyboard layout API is available.
 
-This prevents displaying unintended characters (like Option+C producing "ç"). There might be a better compromise position here and feedback is welcome.
+This prevents displaying unintended characters (like Option+C producing "ç"). There might be a better compromise position here and feedback is welcome from users with international or non-QWERTY layouts.
 
 ## Development
 
