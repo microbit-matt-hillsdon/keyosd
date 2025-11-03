@@ -16,6 +16,8 @@ export class KeyCastJS {
   private options: Required<KeyCastOptions>;
   private isDragging = false;
   private dragOffset = { x: 0, y: 0 };
+  private anchorCorner: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' = 'bottom-right';
+  private anchorOffset = { x: 0, y: 0 };
   private boundKeyDownHandler: (e: KeyboardEvent) => void;
   private boundKeyUpHandler: (e: KeyboardEvent) => void;
   private boundMouseDownHandler: (e: MouseEvent) => void;
@@ -94,13 +96,18 @@ export class KeyCastJS {
     // Set initial position
     if (this.options.x === -1 || this.options.y === -1) {
       // Default to bottom-right with 1rem inset
+      // Use clientWidth/clientHeight to exclude scrollbars
+      const viewportWidth = document.documentElement.clientWidth;
+      const viewportHeight = document.documentElement.clientHeight;
       const inset = 16; // 1rem = 16px
-      this.setPosition(
-        window.innerWidth - inset - 100, // 100px is half the overlay width (200px)
-        window.innerHeight - inset - 50  // 50px is half the overlay height (~100px)
-      );
+      const x = viewportWidth - inset - 100; // 100px is half the overlay width (200px)
+      const y = viewportHeight - inset - 50;  // 50px is half the overlay height (~100px)
+      this.setPosition(x, y);
+      this.anchorCorner = 'bottom-right';
+      this.anchorOffset = { x: inset + 100, y: inset + 50 };
     } else {
       this.setPosition(this.options.x, this.options.y);
+      this.updateAnchor();
     }
 
     // Add event listeners
@@ -124,11 +131,15 @@ export class KeyCastJS {
     const overlayWidth = 200;
     const overlayHeight = 100;
 
+    // Use clientWidth/clientHeight to exclude scrollbars
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+
     // Calculate bounds considering the transform translate(-50%, -50%)
     const minX = overlayWidth / 2;
-    const maxX = window.innerWidth - overlayWidth / 2;
+    const maxX = viewportWidth - overlayWidth / 2;
     const minY = overlayHeight / 2;
-    const maxY = window.innerHeight - overlayHeight / 2;
+    const maxY = viewportHeight - overlayHeight / 2;
 
     return {
       x: Math.max(minX, Math.min(maxX, x)),
@@ -136,11 +147,67 @@ export class KeyCastJS {
     };
   }
 
-  private handleResize(): void {
-    // Re-constrain position on window resize
+  private updateAnchor(): void {
     const currentLeft = parseFloat(this.overlay.style.left) || 0;
     const currentTop = parseFloat(this.overlay.style.top) || 0;
-    this.setPosition(currentLeft, currentTop);
+
+    // Use clientWidth/clientHeight to exclude scrollbars
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+
+    // Determine nearest corner
+    const distanceToLeft = currentLeft;
+    const distanceToRight = viewportWidth - currentLeft;
+    const distanceToTop = currentTop;
+    const distanceToBottom = viewportHeight - currentTop;
+
+    const isNearLeft = distanceToLeft < distanceToRight;
+    const isNearTop = distanceToTop < distanceToBottom;
+
+    // Set anchor corner
+    if (isNearTop && isNearLeft) {
+      this.anchorCorner = 'top-left';
+      this.anchorOffset = { x: currentLeft, y: currentTop };
+    } else if (isNearTop && !isNearLeft) {
+      this.anchorCorner = 'top-right';
+      this.anchorOffset = { x: viewportWidth - currentLeft, y: currentTop };
+    } else if (!isNearTop && isNearLeft) {
+      this.anchorCorner = 'bottom-left';
+      this.anchorOffset = { x: currentLeft, y: viewportHeight - currentTop };
+    } else {
+      this.anchorCorner = 'bottom-right';
+      this.anchorOffset = { x: viewportWidth - currentLeft, y: viewportHeight - currentTop };
+    }
+  }
+
+  private handleResize(): void {
+    // Use clientWidth/clientHeight to exclude scrollbars
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+
+    // Recalculate position based on anchor corner
+    let x: number, y: number;
+
+    switch (this.anchorCorner) {
+      case 'top-left':
+        x = this.anchorOffset.x;
+        y = this.anchorOffset.y;
+        break;
+      case 'top-right':
+        x = viewportWidth - this.anchorOffset.x;
+        y = this.anchorOffset.y;
+        break;
+      case 'bottom-left':
+        x = this.anchorOffset.x;
+        y = viewportHeight - this.anchorOffset.y;
+        break;
+      case 'bottom-right':
+        x = viewportWidth - this.anchorOffset.x;
+        y = viewportHeight - this.anchorOffset.y;
+        break;
+    }
+
+    this.setPosition(x, y);
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
@@ -332,6 +399,9 @@ export class KeyCastJS {
 
     document.removeEventListener('mousemove', this.boundMouseMoveHandler);
     document.removeEventListener('mouseup', this.boundMouseUpHandler);
+
+    // Update anchor to nearest corner after drag
+    this.updateAnchor();
   }
 
   private handleTouchStart(e: TouchEvent): void {
@@ -369,6 +439,9 @@ export class KeyCastJS {
 
     document.removeEventListener('touchmove', this.boundTouchMoveHandler);
     document.removeEventListener('touchend', this.boundTouchEndHandler);
+
+    // Update anchor to nearest corner after drag
+    this.updateAnchor();
   }
 
   public enable(): void {

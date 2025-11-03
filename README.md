@@ -13,6 +13,7 @@ A minimalist TypeScript library for displaying keystrokes like the Mac app KeyCa
 - Modifiers shown in both the display area and as hold state indicators
 - Positioned in bottom-right by default (1rem inset)
 - Fixed positioning - stays visible when scrolling
+- Smart corner-relative anchoring - maintains position on window resize
 - Automatic bounds checking - never moves out of viewport
 - Draggable display that can be moved with mouse or touch
 - Touch device support (mobile and tablet)
@@ -104,8 +105,11 @@ interface KeyCastOptions {
 ## Positioning
 
 - **Default position:** Bottom-right corner with 1rem (16px) inset
+- **Scrollbar-aware:** Accounts for scrollbar presence when positioning
 - **Fixed positioning:** Stays visible when scrolling
-- **Bounds checking:** Automatically constrains position within viewport on window resize
+- **Corner-relative anchoring:** When dragged, automatically anchors to the nearest corner
+- **Smart resize behavior:** Maintains position relative to its anchor corner when window resizes
+- **Bounds checking:** Automatically constrains position within viewport
 - **Draggable:** Click and drag to reposition anywhere on screen
 
 ## Development

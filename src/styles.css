@@ -5,7 +5,7 @@
   cursor: move;
   user-select: none;
   touch-action: none;
-  padding: 8px 12px;
+  padding: 6px;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 12px;
   backdrop-filter: blur(10px);
@@ -13,9 +13,10 @@
   transition: box-shadow 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   width: 200px;
+  height: 100px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .keycastjs-overlay.keycastjs-dragging {
@@ -27,11 +28,11 @@
   color: #ffffff;
   font-weight: 400;
   text-align: center;
-  height: 60px;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   line-height: 1.2;
   transition: font-size 0.15s ease;
   word-break: break-all;
@@ -41,19 +42,21 @@
 .keycastjs-modifiers-area {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding-top: 4px;
+  gap: 6px;
+  padding-top: 3px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
 }
 
 .keycastjs-modifier {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
   color: #ffffff;
   opacity: 0.25;
   transition: opacity 0.15s ease;
-  min-width: 20px;
+  min-width: 18px;
   text-align: center;
+  line-height: 1;
 }
 
 .keycastjs-modifier-active {
