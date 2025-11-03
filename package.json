@@ -25,6 +25,7 @@
     "build": "npm run build:lib && npm run build:standalone",
     "build:lib": "tsc && vite build",
     "build:standalone": "BUILD_MODE=standalone vite build",
+    "build:demo": "BUILD_MODE=demo vite build",
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

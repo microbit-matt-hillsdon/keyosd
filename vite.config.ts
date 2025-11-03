@@ -3,26 +3,38 @@ import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
 const isStandalone = process.env.BUILD_MODE === "standalone";
+const isDemoMode = process.env.BUILD_MODE === "demo";
 
 export default defineConfig({
-  plugins: [dts({ include: ["src"], exclude: ["src/standalone.ts"] })],
-  build: {
-    lib: {
-      entry: resolve(
-        __dirname,
-        isStandalone ? "src/standalone.ts" : "src/index.ts"
-      ),
-      name: "KeyOSD",
-      formats: ["es", "umd"],
-      fileName: (format) => {
-        const base = isStandalone ? "keyosd.standalone" : "keyosd";
-        return `${base}.${format === "es" ? "js" : "umd.cjs"}`;
+  plugins: isDemoMode
+    ? []
+    : [dts({ include: ["src"], exclude: ["src/standalone.ts"] })],
+  build: isDemoMode
+    ? {
+        outDir: "dist-demo",
+        rollupOptions: {
+          input: {
+            main: resolve(__dirname, "index.html"),
+          },
+        },
+      }
+    : {
+        lib: {
+          entry: resolve(
+            __dirname,
+            isStandalone ? "src/standalone.ts" : "src/index.ts"
+          ),
+          name: "KeyOSD",
+          formats: ["es", "umd"],
+          fileName: (format) => {
+            const base = isStandalone ? "keyosd.standalone" : "keyosd";
+            return `${base}.${format === "es" ? "js" : "umd.cjs"}`;
+          },
+        },
+        rollupOptions: {
+          output: {
+            assetFileNames: "keyosd.[ext]",
+          },
+        },
       },
-    },
-    rollupOptions: {
-      output: {
-        assetFileNames: "keyosd.[ext]",
-      },
-    },
-  },
 });
