@@ -6,10 +6,12 @@ A minimalist TypeScript library for displaying keystrokes like the Mac app KeyCa
 
 - KeyCastr Svelte mode visualization
 - Fixed 200×100px compact display
-- Displays up to 6 characters with dynamic font sizing
+- Displays up to 6 characters of recent keystrokes with automatic text scaling (SVG-based)
 - Keystrokes persist and show the most recent input
 - Display clears automatically when modifier keys are pressed/released
-- Persistent modifier key indicators (⇧ ⌃ ⌥ ⌘)
+- Persistent modifier key indicators with platform-specific symbols:
+  - **Mac:** ⇧ ⌃ ⌥ ⌘
+  - **Windows:** ⇧ ^ ⎇ ⊞
 - Modifiers shown in both the display area and as hold state indicators
 - Positioned in bottom-right by default (1rem inset)
 - Fixed positioning - stays visible when scrolling
@@ -17,7 +19,8 @@ A minimalist TypeScript library for displaying keystrokes like the Mac app KeyCa
 - Automatic bounds checking - never moves out of viewport
 - Draggable display that can be moved with mouse or touch
 - Touch device support (mobile and tablet)
-- Text starts large and shrinks to fit as more characters appear
+- Cross-platform support (Mac, Windows, Linux)
+- Text automatically scales to fit using SVG
 - Minimal padding and no width changes
 - No UI framework dependencies
 - Zero ARIA attributes to avoid screen reader interference

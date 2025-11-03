@@ -18,6 +18,13 @@ export class KeyCastJS {
   private dragOffset = { x: 0, y: 0 };
   private anchorCorner: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' = 'bottom-right';
   private anchorOffset = { x: 0, y: 0 };
+  private isMac: boolean = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  private modifierSymbols = {
+    shift: '⇧',
+    ctrl: this.isMac ? '⌃' : '^',
+    alt: this.isMac ? '⌥' : '⎇',
+    meta: this.isMac ? '⌘' : '⊞',
+  };
   private boundKeyDownHandler: (e: KeyboardEvent) => void;
   private boundKeyUpHandler: (e: KeyboardEvent) => void;
   private boundMouseDownHandler: (e: MouseEvent) => void;
@@ -63,6 +70,23 @@ export class KeyCastJS {
   private createDisplayArea(): HTMLElement {
     const display = document.createElement('div');
     display.className = 'keycastjs-display';
+
+    // Create SVG for auto-scaling text
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 200 60');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.classList.add('keycastjs-display-svg');
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '50%');
+    text.setAttribute('y', '50%');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.classList.add('keycastjs-display-text');
+
+    svg.appendChild(text);
+    display.appendChild(svg);
+
     return display;
   }
 
@@ -71,17 +95,17 @@ export class KeyCastJS {
     modifiers.className = 'keycastjs-modifiers-area';
 
     const modifierKeys = [
-      { key: 'shift', symbol: '⇧' },
-      { key: 'ctrl', symbol: '⌃' },
-      { key: 'alt', symbol: '⌥' },
-      { key: 'meta', symbol: '⌘' },
+      { key: 'shift' as keyof typeof this.modifierSymbols },
+      { key: 'ctrl' as keyof typeof this.modifierSymbols },
+      { key: 'alt' as keyof typeof this.modifierSymbols },
+      { key: 'meta' as keyof typeof this.modifierSymbols },
     ];
 
-    modifierKeys.forEach(({ key, symbol }) => {
+    modifierKeys.forEach(({ key }) => {
       const mod = document.createElement('div');
       mod.className = 'keycastjs-modifier';
       mod.dataset.modifier = key;
-      mod.textContent = symbol;
+      mod.textContent = this.modifierSymbols[key];
       modifiers.appendChild(mod);
     });
 
@@ -279,10 +303,10 @@ export class KeyCastJS {
     let displayStr = '';
     const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
 
-    if (e.metaKey) displayStr += '⌘ ';
-    if (e.ctrlKey) displayStr += '⌃ ';
-    if (e.altKey) displayStr += '⌥ ';
-    if (e.shiftKey) displayStr += '⇧ ';
+    if (e.metaKey) displayStr += this.modifierSymbols.meta;
+    if (e.ctrlKey) displayStr += this.modifierSymbols.ctrl;
+    if (e.altKey) displayStr += this.modifierSymbols.alt;
+    if (e.shiftKey) displayStr += this.modifierSymbols.shift;
 
     // Uppercase single-character keys when used with modifiers (not shift alone)
     if (hasModifier && key.length === 1) {
@@ -320,8 +344,12 @@ export class KeyCastJS {
     // Add to buffer
     this.keyBuffer.push(str);
 
-    // Keep only last 6 items
-    if (this.keyBuffer.length > 6) {
+    // Keep trimming from the start until total length <= 6 characters
+    while (this.keyBuffer.length > 0) {
+      const content = this.keyBuffer.join('');
+      if (content.length <= 6) {
+        break;
+      }
       this.keyBuffer.shift();
     }
 
@@ -329,30 +357,11 @@ export class KeyCastJS {
   }
 
   private render(): void {
-    const content = this.keyBuffer.join(' ');
-    this.displayArea.textContent = content;
-
-    // Dynamic font sizing based on content length for 200px width
-    const length = content.length;
-    let fontSize: number;
-
-    if (length <= 2) {
-      fontSize = 48;
-    } else if (length <= 4) {
-      fontSize = 40;
-    } else if (length <= 8) {
-      fontSize = 32;
-    } else if (length <= 12) {
-      fontSize = 26;
-    } else if (length <= 20) {
-      fontSize = 20;
-    } else if (length <= 30) {
-      fontSize = 16;
-    } else {
-      fontSize = 14;
+    const content = this.keyBuffer.join('');
+    const textElement = this.displayArea.querySelector('.keycastjs-display-text');
+    if (textElement) {
+      textElement.textContent = content;
     }
-
-    this.displayArea.style.fontSize = `${fontSize}px`;
   }
 
   private updateModifierDisplay(): void {
@@ -470,6 +479,9 @@ export class KeyCastJS {
 
   public clear(): void {
     this.keyBuffer = [];
-    this.displayArea.textContent = '';
+    const textElement = this.displayArea.querySelector('.keycastjs-display-text');
+    if (textElement) {
+      textElement.textContent = '';
+    }
   }
 }
