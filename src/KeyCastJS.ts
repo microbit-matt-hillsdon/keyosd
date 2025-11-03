@@ -1,15 +1,23 @@
-import type { KeyCastOptions, KeyPress } from './types';
+import type { KeyCastOptions, ModifierStates } from './types';
 import './styles.css';
 
 export class KeyCastJS {
   private container: HTMLElement;
   private overlay: HTMLElement;
-  private keysContainer: HTMLElement;
-  private keyPresses: KeyPress[] = [];
+  private displayArea: HTMLElement;
+  private modifiersArea: HTMLElement;
+  private keyBuffer: string[] = [];
+  private modifierStates: ModifierStates = {
+    shift: false,
+    ctrl: false,
+    alt: false,
+    meta: false,
+  };
   private options: Required<KeyCastOptions>;
   private isDragging = false;
   private dragOffset = { x: 0, y: 0 };
   private boundKeyDownHandler: (e: KeyboardEvent) => void;
+  private boundKeyUpHandler: (e: KeyboardEvent) => void;
   private boundMouseDownHandler: (e: MouseEvent) => void;
   private boundMouseMoveHandler: (e: MouseEvent) => void;
   private boundMouseUpHandler: () => void;
@@ -22,16 +30,16 @@ export class KeyCastJS {
       container: options.container || document.body,
       x: options.x ?? -1,
       y: options.y ?? -1,
-      displayDuration: options.displayDuration ?? 2000,
-      maxKeys: options.maxKeys ?? 5,
       enabled: options.enabled ?? true,
     };
 
     this.container = this.options.container;
     this.overlay = this.createOverlay();
-    this.keysContainer = this.createKeysContainer();
+    this.displayArea = this.createDisplayArea();
+    this.modifiersArea = this.createModifiersArea();
 
     this.boundKeyDownHandler = this.handleKeyDown.bind(this);
+    this.boundKeyUpHandler = this.handleKeyUp.bind(this);
     this.boundMouseDownHandler = this.handleMouseDown.bind(this);
     this.boundMouseMoveHandler = this.handleMouseMove.bind(this);
     this.boundMouseUpHandler = this.handleMouseUp.bind(this);
@@ -48,14 +56,37 @@ export class KeyCastJS {
     return overlay;
   }
 
-  private createKeysContainer(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'keycastjs-keys';
-    return container;
+  private createDisplayArea(): HTMLElement {
+    const display = document.createElement('div');
+    display.className = 'keycastjs-display';
+    return display;
+  }
+
+  private createModifiersArea(): HTMLElement {
+    const modifiers = document.createElement('div');
+    modifiers.className = 'keycastjs-modifiers-area';
+
+    const modifierKeys = [
+      { key: 'shift', symbol: '⇧' },
+      { key: 'ctrl', symbol: '⌃' },
+      { key: 'alt', symbol: '⌥' },
+      { key: 'meta', symbol: '⌘' },
+    ];
+
+    modifierKeys.forEach(({ key, symbol }) => {
+      const mod = document.createElement('div');
+      mod.className = 'keycastjs-modifier';
+      mod.dataset.modifier = key;
+      mod.textContent = symbol;
+      modifiers.appendChild(mod);
+    });
+
+    return modifiers;
   }
 
   private init(): void {
-    this.overlay.appendChild(this.keysContainer);
+    this.overlay.appendChild(this.displayArea);
+    this.overlay.appendChild(this.modifiersArea);
     this.container.appendChild(this.overlay);
 
     // Set initial position
@@ -84,21 +115,35 @@ export class KeyCastJS {
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
-    // Ignore if key is already being displayed (key repeat)
-    if (e.repeat) return;
+    // Check if modifier state changed
+    const prevShift = this.modifierStates.shift;
+    const prevCtrl = this.modifierStates.ctrl;
+    const prevAlt = this.modifierStates.alt;
+    const prevMeta = this.modifierStates.meta;
 
-    const modifiers: string[] = [];
-    if (e.metaKey) modifiers.push('⌘');
-    if (e.ctrlKey) modifiers.push('⌃');
-    if (e.altKey) modifiers.push('⌥');
-    if (e.shiftKey) modifiers.push('⇧');
+    // Update modifier states
+    this.modifierStates.shift = e.shiftKey;
+    this.modifierStates.ctrl = e.ctrlKey;
+    this.modifierStates.alt = e.altKey;
+    this.modifierStates.meta = e.metaKey;
+
+    // Clear display if any modifier state changed
+    if (prevShift !== e.shiftKey || prevCtrl !== e.ctrlKey ||
+        prevAlt !== e.altKey || prevMeta !== e.metaKey) {
+      this.clear();
+    }
+
+    this.updateModifierDisplay();
+
+    // Ignore key repeats
+    if (e.repeat) return;
 
     let key = e.key;
 
     // Normalize key names
     switch (key) {
       case ' ':
-        key = 'Space';
+        key = '␣';
         break;
       case 'ArrowUp':
         key = '↑';
@@ -134,74 +179,96 @@ export class KeyCastJS {
       return;
     }
 
-    const keyPress: KeyPress = {
-      id: `${Date.now()}-${Math.random()}`,
-      key: key.length === 1 ? key.toUpperCase() : key,
-      modifiers,
-      timestamp: Date.now(),
-    };
+    // Build the display string with modifiers
+    let displayStr = '';
+    const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
 
-    this.addKeyPress(keyPress);
+    if (e.metaKey) displayStr += '⌘ ';
+    if (e.ctrlKey) displayStr += '⌃ ';
+    if (e.altKey) displayStr += '⌥ ';
+    if (e.shiftKey) displayStr += '⇧ ';
+
+    // Uppercase single-character keys when used with modifiers (not shift alone)
+    if (hasModifier && key.length === 1) {
+      displayStr += key.toUpperCase();
+    } else {
+      displayStr += key;
+    }
+
+    this.addToBuffer(displayStr);
   }
 
-  private addKeyPress(keyPress: KeyPress): void {
-    this.keyPresses.push(keyPress);
+  private handleKeyUp(e: KeyboardEvent): void {
+    // Check if modifier state changed
+    const prevShift = this.modifierStates.shift;
+    const prevCtrl = this.modifierStates.ctrl;
+    const prevAlt = this.modifierStates.alt;
+    const prevMeta = this.modifierStates.meta;
 
-    // Limit the number of displayed keys
-    if (this.keyPresses.length > this.options.maxKeys) {
-      const removed = this.keyPresses.shift();
-      if (removed) {
-        const element = document.getElementById(removed.id);
-        element?.remove();
+    // Update modifier states
+    this.modifierStates.shift = e.shiftKey;
+    this.modifierStates.ctrl = e.ctrlKey;
+    this.modifierStates.alt = e.altKey;
+    this.modifierStates.meta = e.metaKey;
+
+    // Clear display if any modifier state changed
+    if (prevShift !== e.shiftKey || prevCtrl !== e.ctrlKey ||
+        prevAlt !== e.altKey || prevMeta !== e.metaKey) {
+      this.clear();
+    }
+
+    this.updateModifierDisplay();
+  }
+
+  private addToBuffer(str: string): void {
+    // Add to buffer
+    this.keyBuffer.push(str);
+
+    // Keep only last 6 items
+    if (this.keyBuffer.length > 6) {
+      this.keyBuffer.shift();
+    }
+
+    this.render();
+  }
+
+  private render(): void {
+    const content = this.keyBuffer.join(' ');
+    this.displayArea.textContent = content;
+
+    // Dynamic font sizing based on content length for 200px width
+    const length = content.length;
+    let fontSize: number;
+
+    if (length <= 2) {
+      fontSize = 48;
+    } else if (length <= 4) {
+      fontSize = 40;
+    } else if (length <= 8) {
+      fontSize = 32;
+    } else if (length <= 12) {
+      fontSize = 26;
+    } else if (length <= 20) {
+      fontSize = 20;
+    } else if (length <= 30) {
+      fontSize = 16;
+    } else {
+      fontSize = 14;
+    }
+
+    this.displayArea.style.fontSize = `${fontSize}px`;
+  }
+
+  private updateModifierDisplay(): void {
+    const modifiers = this.modifiersArea.querySelectorAll('.keycastjs-modifier');
+    modifiers.forEach((mod) => {
+      const modifierKey = (mod as HTMLElement).dataset.modifier as keyof ModifierStates;
+      if (this.modifierStates[modifierKey]) {
+        mod.classList.add('keycastjs-modifier-active');
+      } else {
+        mod.classList.remove('keycastjs-modifier-active');
       }
-    }
-
-    this.renderKeyPress(keyPress);
-
-    // Auto-remove after duration
-    setTimeout(() => {
-      this.removeKeyPress(keyPress.id);
-    }, this.options.displayDuration);
-  }
-
-  private renderKeyPress(keyPress: KeyPress): void {
-    const keyElement = document.createElement('div');
-    keyElement.id = keyPress.id;
-    keyElement.className = 'keycastjs-key';
-
-    if (keyPress.modifiers.length > 0) {
-      const modifiersSpan = document.createElement('span');
-      modifiersSpan.className = 'keycastjs-modifiers';
-      modifiersSpan.textContent = keyPress.modifiers.join(' ');
-      keyElement.appendChild(modifiersSpan);
-    }
-
-    const keySpan = document.createElement('span');
-    keySpan.className = 'keycastjs-main-key';
-    keySpan.textContent = keyPress.key;
-    keyElement.appendChild(keySpan);
-
-    this.keysContainer.appendChild(keyElement);
-
-    // Trigger animation
-    requestAnimationFrame(() => {
-      keyElement.classList.add('keycastjs-key-visible');
     });
-  }
-
-  private removeKeyPress(id: string): void {
-    const index = this.keyPresses.findIndex((kp) => kp.id === id);
-    if (index !== -1) {
-      this.keyPresses.splice(index, 1);
-    }
-
-    const element = document.getElementById(id);
-    if (element) {
-      element.classList.add('keycastjs-key-hidden');
-      setTimeout(() => {
-        element.remove();
-      }, 300); // Match fade out animation
-    }
   }
 
   private handleMouseDown(e: MouseEvent): void {
@@ -278,11 +345,13 @@ export class KeyCastJS {
   public enable(): void {
     this.options.enabled = true;
     document.addEventListener('keydown', this.boundKeyDownHandler);
+    document.addEventListener('keyup', this.boundKeyUpHandler);
   }
 
   public disable(): void {
     this.options.enabled = false;
     document.removeEventListener('keydown', this.boundKeyDownHandler);
+    document.removeEventListener('keyup', this.boundKeyUpHandler);
   }
 
   public destroy(): void {
@@ -297,7 +366,7 @@ export class KeyCastJS {
   }
 
   public clear(): void {
-    this.keyPresses = [];
-    this.keysContainer.innerHTML = '';
+    this.keyBuffer = [];
+    this.displayArea.textContent = '';
   }
 }

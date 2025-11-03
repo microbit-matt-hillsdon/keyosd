@@ -8,19 +8,13 @@ export interface KeyCastOptions {
   /** Initial Y position of the visualization. Defaults to bottom-center */
   y?: number;
 
-  /** Duration in ms to display each keystroke. Defaults to 2000 */
-  displayDuration?: number;
-
-  /** Maximum number of keystrokes to show at once. Defaults to 5 */
-  maxKeys?: number;
-
   /** Whether to capture keyboard events. Defaults to true */
   enabled?: boolean;
 }
 
-export interface KeyPress {
-  id: string;
-  key: string;
-  modifiers: string[];
-  timestamp: number;
+export interface ModifierStates {
+  shift: boolean;
+  ctrl: boolean;
+  alt: boolean;
+  meta: boolean;
 }

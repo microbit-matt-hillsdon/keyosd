@@ -1,10 +1,7 @@
 import { KeyCastJS } from './KeyCastJS';
 
 // Initialize KeyCastJS
-const keyCast = new KeyCastJS({
-  displayDuration: 2500,
-  maxKeys: 6,
-});
+const keyCast = new KeyCastJS();
 
 // Setup demo controls
 const toggleBtn = document.getElementById('toggleBtn') as HTMLButtonElement;

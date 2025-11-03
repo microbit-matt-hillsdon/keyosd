@@ -23,23 +23,23 @@
 </head>
 <body>
   <h1>KeyCastJS Usage Example</h1>
-  <p>Press any keys to see them displayed. Try using modifier keys like Cmd/Ctrl, Shift, Alt, etc.</p>
+  <p>Type to see keystrokes in KeyCastr Svelte mode. Hold modifier keys (⌘/⌃/⌥/⇧) to see them light up below the display.</p>
 
   <div class="example">
     <h2>Test Area</h2>
     <input type="text" placeholder="Type here to test...">
+    <p style="margin-top: 10px; font-size: 14px;">Try: Regular keys, modifier combos (⌘+C), arrows (↑↓←→), or special keys (Space, Enter, Tab)</p>
   </div>
 
   <!-- Include the library -->
   <script src="dist/keycastjs.umd.cjs"></script>
   <script>
     // Initialize KeyCastJS
-    const keyCast = new KeyCastJS.KeyCastJS({
-      displayDuration: 3000,
-      maxKeys: 5
-    });
+    const keyCast = new KeyCastJS.KeyCastJS();
 
-    // The visualization will now appear and track all keystrokes!
+    // The visualization shows up to 6 characters with dynamic sizing
+    // and persistent modifier key indicators below.
+    // Display clears automatically when modifier keys are pressed/released.
     // You can drag it to reposition it anywhere on the screen.
   </script>
 </body>

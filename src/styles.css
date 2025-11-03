@@ -5,13 +5,17 @@
   cursor: move;
   user-select: none;
   touch-action: none;
-  padding: 16px 24px;
+  padding: 8px 12px;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 12px;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .keycastjs-overlay.keycastjs-dragging {
@@ -19,47 +23,39 @@
   cursor: grabbing;
 }
 
-.keycastjs-keys {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 120px;
-}
-
-.keycastjs-key {
+.keycastjs-display {
+  color: #ffffff;
+  font-weight: 400;
+  text-align: center;
+  height: 60px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  transition: font-size 0.15s ease;
+  word-break: break-all;
+  overflow: hidden;
+}
+
+.keycastjs-modifiers-area {
+  display: flex;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 500;
-  opacity: 0;
-  transform: translateY(10px) scale(0.95);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  white-space: nowrap;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.keycastjs-key-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.keycastjs-key-hidden {
-  opacity: 0;
-  transform: translateY(-10px) scale(0.95);
-}
-
-.keycastjs-modifiers {
-  color: #a0a0a0;
+.keycastjs-modifier {
   font-size: 16px;
   font-weight: 400;
+  color: #ffffff;
+  opacity: 0.25;
+  transition: opacity 0.15s ease;
+  min-width: 20px;
+  text-align: center;
 }
 
-.keycastjs-main-key {
-  color: #ffffff;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+.keycastjs-modifier-active {
+  opacity: 1;
 }
