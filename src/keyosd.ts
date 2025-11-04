@@ -25,6 +25,45 @@ const styles = `
   cursor: grabbing;
 }
 
+.keyosd-close-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.keyosd-overlay:hover .keyosd-close-button {
+  opacity: 1;
+}
+
+.keyosd-close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.keyosd-close-button:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.keyosd-close-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
 .keyosd-display {
   flex: 1;
   display: flex;
@@ -92,6 +131,7 @@ function injectStyles() {
 export class KeyOSD {
   private container: HTMLElement;
   private overlay: HTMLElement;
+  private closeButton: HTMLElement;
   private displayArea: HTMLElement;
   private modifiersArea: HTMLElement;
   private keyBuffer: string[] = [];
@@ -133,6 +173,7 @@ export class KeyOSD {
   private boundResizeHandler: () => void;
   private boundFocusHandler: (e: FocusEvent) => void;
   private boundBlurHandler: (e: FocusEvent) => void;
+  private boundCloseButtonHandler: (e: MouseEvent) => void;
   private wasEnabledBeforeFocus: boolean = false;
 
   constructor(options: KeyOSDOptions = {}) {
@@ -148,6 +189,7 @@ export class KeyOSD {
 
     this.container = this.options.container;
     this.overlay = this.createOverlay();
+    this.closeButton = this.createCloseButton();
     this.displayArea = this.createDisplayArea();
     this.modifiersArea = this.createModifiersArea();
 
@@ -162,6 +204,7 @@ export class KeyOSD {
     this.boundResizeHandler = this.handleResize.bind(this);
     this.boundFocusHandler = this.handleFocus.bind(this);
     this.boundBlurHandler = this.handleBlur.bind(this);
+    this.boundCloseButtonHandler = this.handleCloseButton.bind(this);
 
     this.init();
   }
@@ -170,6 +213,19 @@ export class KeyOSD {
     const overlay = document.createElement("div");
     overlay.className = "keyosd-overlay";
     return overlay;
+  }
+
+  private createCloseButton(): HTMLElement {
+    const button = document.createElement("button");
+    button.className = "keyosd-close-button";
+    button.ariaLabel = "Close";
+    button.innerHTML = `
+      <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+        <line x1="2" y1="2" x2="10" y2="10"/>
+        <line x1="10" y1="2" x2="2" y2="10"/>
+      </svg>
+    `;
+    return button;
   }
 
   private createDisplayArea(): HTMLElement {
@@ -228,6 +284,7 @@ export class KeyOSD {
   }
 
   private async init(): Promise<void> {
+    this.overlay.appendChild(this.closeButton);
     this.overlay.appendChild(this.displayArea);
     this.overlay.appendChild(this.modifiersArea);
     this.container.appendChild(this.overlay);
@@ -289,6 +346,7 @@ export class KeyOSD {
       this.enable();
     }
 
+    this.closeButton.addEventListener("click", this.boundCloseButtonHandler);
     this.overlay.addEventListener("mousedown", this.boundMouseDownHandler);
     this.overlay.addEventListener("touchstart", this.boundTouchStartHandler, {
       passive: false,
@@ -629,7 +687,17 @@ export class KeyOSD {
     });
   }
 
+  private handleCloseButton(e: MouseEvent): void {
+    e.stopPropagation(); // Prevent triggering drag
+    this.disable();
+  }
+
   private handleMouseDown(e: MouseEvent): void {
+    // Don't start dragging if clicking the close button
+    if (e.target === this.closeButton || this.closeButton.contains(e.target as Node)) {
+      return;
+    }
+
     if (e.button !== 0) return; // Only left click
 
     this.isDragging = true;
@@ -774,6 +842,7 @@ export class KeyOSD {
 
   public destroy(): void {
     this.disable();
+    this.closeButton.removeEventListener("click", this.boundCloseButtonHandler);
     this.overlay.removeEventListener("mousedown", this.boundMouseDownHandler);
     this.overlay.removeEventListener("touchstart", this.boundTouchStartHandler);
     document.removeEventListener("mousemove", this.boundMouseMoveHandler);
