@@ -6,6 +6,8 @@ Display keystrokes and shortcuts in an on-screen overlay inside a web app.
 
 !["Screen capture showing hello world Cmd+C Cmd+V being displayed as they are typed"](https://github.com/user-attachments/assets/8a0fadbc-0da1-4f8a-9303-5e51b7b6b933)
 
+[Try it now](https://microbit-matt-hillsdon.github.io/keyosd/)
+
 Built for user testing keyboard interactions in an environment where installing
 tools like [KeyCastr](https://github.com/keycastr/keycastr) is not viable.
 
