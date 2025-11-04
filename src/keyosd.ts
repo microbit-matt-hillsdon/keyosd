@@ -33,27 +33,30 @@ const styles = `
   height: 32px;
   padding: 0;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 6px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease, background 0.15s ease;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1;
+  transition: background 0.15s ease;
 }
 
 .keyosd-overlay:hover .keyosd-close-button {
-  opacity: 1;
+  display: flex;
+}
+
+.keyosd-overlay.keyosd-dragging .keyosd-close-button {
+  display: none;
 }
 
 .keyosd-close-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .keyosd-close-button:active {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.85);
 }
 
 .keyosd-close-button svg {
