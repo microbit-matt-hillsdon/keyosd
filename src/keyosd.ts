@@ -158,22 +158,10 @@ export class KeyOSD {
     meta: this.isMac ? "⌘" : "⊞",
   };
   private keyboardLayoutMap: any = null; // KeyboardLayoutMap (if available)
-  private boundKeyDownHandler: (e: KeyboardEvent) => void;
-  private boundKeyUpHandler: (e: KeyboardEvent) => void;
   private keyUpDownEventOptions = {
     capture: true,
     passive: true,
   };
-  private boundMouseDownHandler: (e: MouseEvent) => void;
-  private boundMouseMoveHandler: (e: MouseEvent) => void;
-  private boundMouseUpHandler: () => void;
-  private boundTouchStartHandler: (e: TouchEvent) => void;
-  private boundTouchMoveHandler: (e: TouchEvent) => void;
-  private boundTouchEndHandler: () => void;
-  private boundResizeHandler: () => void;
-  private boundFocusHandler: (e: FocusEvent) => void;
-  private boundBlurHandler: (e: FocusEvent) => void;
-  private boundCloseButtonHandler: (e: MouseEvent) => void;
   private wasEnabledBeforeFocus: boolean = false;
 
   constructor(options: KeyOSDOptions = {}) {
@@ -192,19 +180,6 @@ export class KeyOSD {
     this.closeButton = this.createCloseButton();
     this.displayArea = this.createDisplayArea();
     this.modifiersArea = this.createModifiersArea();
-
-    this.boundKeyDownHandler = this.handleKeyDown.bind(this);
-    this.boundKeyUpHandler = this.handleKeyUp.bind(this);
-    this.boundMouseDownHandler = this.handleMouseDown.bind(this);
-    this.boundMouseMoveHandler = this.handleMouseMove.bind(this);
-    this.boundMouseUpHandler = this.handleMouseUp.bind(this);
-    this.boundTouchStartHandler = this.handleTouchStart.bind(this);
-    this.boundTouchMoveHandler = this.handleTouchMove.bind(this);
-    this.boundTouchEndHandler = this.handleTouchEnd.bind(this);
-    this.boundResizeHandler = this.handleResize.bind(this);
-    this.boundFocusHandler = this.handleFocus.bind(this);
-    this.boundBlurHandler = this.handleBlur.bind(this);
-    this.boundCloseButtonHandler = this.handleCloseButton.bind(this);
 
     this.init();
   }
@@ -346,14 +321,14 @@ export class KeyOSD {
       this.enable();
     }
 
-    this.closeButton.addEventListener("click", this.boundCloseButtonHandler);
-    this.overlay.addEventListener("mousedown", this.boundMouseDownHandler);
-    this.overlay.addEventListener("touchstart", this.boundTouchStartHandler, {
+    this.closeButton.addEventListener("click", this.handleCloseButton);
+    this.overlay.addEventListener("mousedown", this.handleMouseDown);
+    this.overlay.addEventListener("touchstart", this.handleTouchStart, {
       passive: false,
     });
-    window.addEventListener("resize", this.boundResizeHandler);
-    document.addEventListener("focusin", this.boundFocusHandler);
-    document.addEventListener("focusout", this.boundBlurHandler);
+    window.addEventListener("resize", this.handleResize);
+    document.addEventListener("focusin", this.handleFocus);
+    document.addEventListener("focusout", this.handleBlur);
   }
 
   private async initKeyboardLayoutMap(): Promise<void> {
@@ -436,7 +411,7 @@ export class KeyOSD {
     }
   }
 
-  private handleResize(): void {
+  private handleResize = (): void => {
     // Use clientWidth/clientHeight to exclude scrollbars
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
@@ -464,7 +439,7 @@ export class KeyOSD {
     }
 
     this.setPosition(x, y);
-  }
+  };
 
   private codeToKey(code: string, uppercase: boolean = false): string | null {
     // Try KeyboardLayoutMap first (progressive enhancement for Chromium)
@@ -528,7 +503,7 @@ export class KeyOSD {
     return codeMap[code] || null;
   }
 
-  private handleKeyDown(e: KeyboardEvent): void {
+  private handleKeyDown = (e: KeyboardEvent): void => {
     // Check if modifier state changed
     const prevShift = this.modifierStates.shift;
     const prevCtrl = this.modifierStates.ctrl;
@@ -622,9 +597,9 @@ export class KeyOSD {
     displayStr += key;
 
     this.addToBuffer(displayStr);
-  }
+  };
 
-  private handleKeyUp(e: KeyboardEvent): void {
+  private handleKeyUp = (e: KeyboardEvent): void => {
     // Check if modifier state changed
     const prevShift = this.modifierStates.shift;
     const prevCtrl = this.modifierStates.ctrl;
@@ -648,7 +623,7 @@ export class KeyOSD {
     }
 
     this.updateModifierDisplay();
-  }
+  };
 
   private addToBuffer(str: string): void {
     // Add to buffer
@@ -687,14 +662,17 @@ export class KeyOSD {
     });
   }
 
-  private handleCloseButton(e: MouseEvent): void {
+  private handleCloseButton = (e: MouseEvent): void => {
     e.stopPropagation(); // Prevent triggering drag
     this.disable();
-  }
+  };
 
-  private handleMouseDown(e: MouseEvent): void {
+  private handleMouseDown = (e: MouseEvent): void => {
     // Don't start dragging if clicking the close button
-    if (e.target === this.closeButton || this.closeButton.contains(e.target as Node)) {
+    if (
+      e.target === this.closeButton ||
+      this.closeButton.contains(e.target as Node)
+    ) {
       return;
     }
 
@@ -708,33 +686,33 @@ export class KeyOSD {
 
     this.overlay.classList.add("keyosd-dragging");
 
-    document.addEventListener("mousemove", this.boundMouseMoveHandler);
-    document.addEventListener("mouseup", this.boundMouseUpHandler);
+    document.addEventListener("mousemove", this.handleMouseMove);
+    document.addEventListener("mouseup", this.handleMouseUp);
 
     e.preventDefault();
-  }
+  };
 
-  private handleMouseMove(e: MouseEvent): void {
+  private handleMouseMove = (e: MouseEvent): void => {
     if (!this.isDragging) return;
 
     const x = e.clientX - this.dragOffset.x;
     const y = e.clientY - this.dragOffset.y;
 
     this.setPosition(x, y);
-  }
+  };
 
-  private handleMouseUp(): void {
+  private handleMouseUp = (): void => {
     this.isDragging = false;
     this.overlay.classList.remove("keyosd-dragging");
 
-    document.removeEventListener("mousemove", this.boundMouseMoveHandler);
-    document.removeEventListener("mouseup", this.boundMouseUpHandler);
+    document.removeEventListener("mousemove", this.handleMouseMove);
+    document.removeEventListener("mouseup", this.handleMouseUp);
 
     // Update anchor to nearest corner after drag
     this.updateAnchor();
-  }
+  };
 
-  private handleTouchStart(e: TouchEvent): void {
+  private handleTouchStart = (e: TouchEvent): void => {
     if (e.touches.length !== 1) return; // Only single touch
 
     this.isDragging = true;
@@ -746,15 +724,15 @@ export class KeyOSD {
 
     this.overlay.classList.add("keyosd-dragging");
 
-    document.addEventListener("touchmove", this.boundTouchMoveHandler, {
+    document.addEventListener("touchmove", this.handleTouchMove, {
       passive: false,
     });
-    document.addEventListener("touchend", this.boundTouchEndHandler);
+    document.addEventListener("touchend", this.handleTouchEnd);
 
     e.preventDefault();
-  }
+  };
 
-  private handleTouchMove(e: TouchEvent): void {
+  private handleTouchMove = (e: TouchEvent): void => {
     if (!this.isDragging || e.touches.length !== 1) return;
 
     const touch = e.touches[0];
@@ -763,18 +741,18 @@ export class KeyOSD {
 
     this.setPosition(x, y);
     e.preventDefault();
-  }
+  };
 
-  private handleTouchEnd(): void {
+  private handleTouchEnd = (): void => {
     this.isDragging = false;
     this.overlay.classList.remove("keyosd-dragging");
 
-    document.removeEventListener("touchmove", this.boundTouchMoveHandler);
-    document.removeEventListener("touchend", this.boundTouchEndHandler);
+    document.removeEventListener("touchmove", this.handleTouchMove);
+    document.removeEventListener("touchend", this.handleTouchEnd);
 
     // Update anchor to nearest corner after drag
     this.updateAnchor();
-  }
+  };
 
   private isSecuritySensitiveField(element: HTMLElement): boolean {
     if (!(element instanceof HTMLInputElement)) return false;
@@ -792,34 +770,34 @@ export class KeyOSD {
     return false;
   }
 
-  private handleFocus(e: FocusEvent): void {
+  private handleFocus = (e: FocusEvent): void => {
     if (e.target && this.isSecuritySensitiveField(e.target as HTMLElement)) {
       this.wasEnabledBeforeFocus = this.options.enabled;
       if (this.wasEnabledBeforeFocus) {
         this.disable();
       }
     }
-  }
+  };
 
-  private handleBlur(e: FocusEvent): void {
+  private handleBlur = (e: FocusEvent): void => {
     if (e.target && this.isSecuritySensitiveField(e.target as HTMLElement)) {
       if (this.wasEnabledBeforeFocus) {
         this.enable();
       }
     }
-  }
+  };
 
   public enable(): void {
     this.options.enabled = true;
     this.overlay.style.display = "";
     document.addEventListener(
       "keydown",
-      this.boundKeyDownHandler,
+      this.handleKeyDown,
       this.keyUpDownEventOptions
     );
     document.addEventListener(
       "keyup",
-      this.boundKeyUpHandler,
+      this.handleKeyUp,
       this.keyUpDownEventOptions
     );
   }
@@ -830,28 +808,28 @@ export class KeyOSD {
     this.overlay.style.display = "none";
     document.removeEventListener(
       "keydown",
-      this.boundKeyDownHandler,
+      this.handleKeyDown,
       this.keyUpDownEventOptions
     );
     document.removeEventListener(
       "keyup",
-      this.boundKeyUpHandler,
+      this.handleKeyUp,
       this.keyUpDownEventOptions
     );
   }
 
   public destroy(): void {
     this.disable();
-    this.closeButton.removeEventListener("click", this.boundCloseButtonHandler);
-    this.overlay.removeEventListener("mousedown", this.boundMouseDownHandler);
-    this.overlay.removeEventListener("touchstart", this.boundTouchStartHandler);
-    document.removeEventListener("mousemove", this.boundMouseMoveHandler);
-    document.removeEventListener("mouseup", this.boundMouseUpHandler);
-    document.removeEventListener("touchmove", this.boundTouchMoveHandler);
-    document.removeEventListener("touchend", this.boundTouchEndHandler);
-    window.removeEventListener("resize", this.boundResizeHandler);
-    document.removeEventListener("focusin", this.boundFocusHandler);
-    document.removeEventListener("focusout", this.boundBlurHandler);
+    this.closeButton.removeEventListener("click", this.handleCloseButton);
+    this.overlay.removeEventListener("mousedown", this.handleMouseDown);
+    this.overlay.removeEventListener("touchstart", this.handleTouchStart);
+    document.removeEventListener("mousemove", this.handleMouseMove);
+    document.removeEventListener("mouseup", this.handleMouseUp);
+    document.removeEventListener("touchmove", this.handleTouchMove);
+    document.removeEventListener("touchend", this.handleTouchEnd);
+    window.removeEventListener("resize", this.handleResize);
+    document.removeEventListener("focusin", this.handleFocus);
+    document.removeEventListener("focusout", this.handleBlur);
     this.overlay.remove();
   }
 
