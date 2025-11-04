@@ -1,0 +1,118 @@
+.keyosd-overlay {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 999999;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 200px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+}
+
+.keyosd-overlay.keyosd-dragging {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  cursor: grabbing;
+}
+
+.keyosd-close-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: background 0.15s ease;
+}
+
+.keyosd-overlay:hover .keyosd-close-button {
+  display: flex;
+}
+
+.keyosd-overlay.keyosd-dragging .keyosd-close-button {
+  display: none;
+}
+
+.keyosd-close-button:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.keyosd-close-button:active {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.keyosd-close-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.keyosd-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  padding: 6px;
+}
+
+.keyosd-display-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.keyosd-display-text {
+  fill: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 38px;
+  letter-spacing: 0.02em;
+}
+
+.keyosd-modifiers-area {
+  display: flex;
+  height: 30px;
+  justify-content: space-between;
+  align-items: stretch;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.keyosd-modifier {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.keyosd-modifier:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.keyosd-modifier-inner {
+  font-size: 16px;
+  color: #888;
+  transition: color 0.15s ease;
+  line-height: 1;
+}
+
+.keyosd-modifier-active .keyosd-modifier-inner {
+  color: #fff;
+}
