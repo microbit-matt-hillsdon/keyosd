@@ -10,7 +10,7 @@ tools like [KeyCastr](https://github.com/keycastr/keycastr) is not viable.
 You can:
 
 - Integrate it in your app (e.g. via a feature flag)
-- For ad hoc testing, use a bookmarklet to run it in a page you don't control
+- For ad hoc testing, use a bookmarklet to run it in a page you don't control (but you might hit [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP) errors)
 
 Bookmarklet:
 
@@ -32,7 +32,7 @@ npm install keyosd
 
 ## Usage
 
-### Standalone (Script Tag)
+### Standalone (script tag)
 
 Just include the standalone script. KeyOSD will automatically initialize:
 
@@ -71,7 +71,7 @@ Available data attributes:
 - `data-x-offset`: Horizontal offset from the anchor edge in pixels (default: `16`)
 - `data-y-offset`: Vertical offset from the anchor edge in pixels (default: `16`)
 
-#### Controlling the Instance
+#### Controlling the instance
 
 The overlay will appear automatically and start capturing keystrokes. Access the instance via `window.keyosd` if you need to control it:
 
@@ -84,9 +84,9 @@ window.keyosd.enable();
 window.keyosd.clear();
 ```
 
-### As a Module
+### As a module
 
-**Not yet published to NPM**
+**⚠️ Not yet published to NPM**
 
 Import and initialize manually for more control (styles are automatically injected):
 
@@ -97,7 +97,7 @@ import { KeyOSD } from "keyosd";
 const keyosd = new KeyOSD();
 ```
 
-### With Options
+### With options
 
 ```typescript
 import { KeyOSD } from "keyosd";
@@ -131,7 +131,7 @@ keyosd.enable();
 
 #### `disable()`
 
-Stop capturing keyboard events.
+Stop capturing keyboard events and hide the UI.
 
 ```typescript
 keyosd.disable();
@@ -165,16 +165,15 @@ interface KeyOSDOptions {
 }
 ```
 
-## Keyboard Layout Support
+## Keyboard layout support
 
-**Normal typing** shows the actual characters you type, respecting your keyboard layout (AZERTY, Dvorak, etc.)
+Browsers key events expose a key `code` in terms of a US ASCII QWERTY keyboard and a `key` property that exposes the resulting character.
 
-**Keyboard shortcuts** (with Cmd/Ctrl/Alt) work differently:
+Generally it's preferable to use `key`. But this presents a challenge with shortcuts like Option+C for which the key is `ç` but you might reasonably expect to see ⌥C.
 
-- **Chrome/Edge/Opera**: Uses your actual keyboard layout. On AZERTY, Cmd+A shows "⌘A" ✓
-- **Firefox/Safari**: Uses QWERTY positions as no keyboard layout API is available.
+So, for normal typing we use `key`. When modifiers are used, we use `code` then map it to the corresponding key using [KeyboardLayoutMap](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardLayoutMap) when available, otherwise a QWERTY-specific default mapping.
 
-This prevents displaying unintended characters (like Option+C producing "ç"). There might be a better compromise position here and feedback is welcome from users with international or non-QWERTY layouts.
+There might be a better compromise position here and feedback is welcome from users with international or non-QWERTY layouts.
 
 ## Development
 
