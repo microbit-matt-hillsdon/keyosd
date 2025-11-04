@@ -1,7 +1,5 @@
 # KeyOSD
 
-**Warning: This is very much a mostly-AI-coded first draft**
-
 Display keystrokes and shortcuts in an on-screen overlay inside a web app.
 
 !["Screen capture showing hello world Cmd+C Cmd+V being displayed as they are typed"](https://github.com/user-attachments/assets/8a0fadbc-0da1-4f8a-9303-5e51b7b6b933)
@@ -11,16 +9,7 @@ Display keystrokes and shortcuts in an on-screen overlay inside a web app.
 Built for user testing keyboard interactions in an environment where installing
 tools like [KeyCastr](https://github.com/keycastr/keycastr) is not viable.
 
-You can:
-
-- Integrate it in your app (e.g. via a feature flag)
-- For ad hoc testing, use a bookmarklet to run it in a page you don't control (but you might hit [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP) errors)
-
-Bookmarklet:
-
-```
-javascript:(()=>(document.body.appendChild(document.createElement("script")).src = "https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"))()
-```
+You can integrate it in your app or user testing environment with a simple script tag or for ad hoc testing use a bookmarklet to run it in a page you don't control.
 
 ## Features
 
@@ -28,17 +17,24 @@ javascript:(()=>(document.body.appendChild(document.createElement("script")).src
 - Compact visualization inspired by [KeyCastr](https://github.com/keycastr/keycastr)'s Svelte-mode
 - Draggable to move away from user interface elements as needed
 
-## Installation
-
-```bash
-npm install keyosd
-```
-
 ## Usage
 
-### Standalone (script tag)
+### Bookmarklet
 
-Just include the standalone script. KeyOSD will automatically initialize:
+Bookmarklet to copy paste as the bookmark URL ([what's a bookmarklet?](https://en.wikipedia.org/wiki/Bookmarklet)):
+
+```
+javascript:(function() { document.body.appendChild(document.createElement("script")).src = "https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"})()
+```
+
+Note you might hit [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP) errors. There's nothing that can be done with this project in that case if you can't modify the app.
+
+**⚠️ This runs JavaScript from this project with full access to your current browser tab**
+
+
+### Script tag
+
+Just include the script. KeyOSD will automatically initialize:
 
 ```html
 <script src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"></script>
@@ -64,8 +60,6 @@ Configure the overlay position using data attributes on the script tag:
 <script
   src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"
   data-anchor="top-left"
-  data-x-offset="20"
-  data-y-offset="20"
 ></script>
 ```
 
