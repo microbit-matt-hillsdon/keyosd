@@ -5,11 +5,14 @@ import type { KeyOSDOptions } from "./types";
 if (typeof window !== "undefined") {
   let instance: KeyOSD | null = null;
 
+  // Capture the script tag reference during synchronous execution
+  // document.currentScript is null when called from event listeners
+  const scriptTag = document.currentScript as HTMLScriptElement | null;
+
   // Initialize on DOM ready
   const init = () => {
     if (!instance) {
       // Read configuration from script tag data attributes
-      const scriptTag = document.currentScript as HTMLScriptElement | null;
       const options: KeyOSDOptions = {};
 
       if (scriptTag) {
