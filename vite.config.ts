@@ -6,6 +6,7 @@ const isStandalone = process.env.BUILD_MODE === "standalone";
 const isDemoMode = process.env.BUILD_MODE === "demo";
 
 export default defineConfig({
+  base: isDemoMode ? "./" : undefined,
   plugins: isDemoMode
     ? []
     : [dts({ include: ["src"], exclude: ["src/standalone.ts"] })],
