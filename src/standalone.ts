@@ -1,4 +1,5 @@
 import { KeyOSD } from "./keyosd";
+import type { KeyOSDOptions } from "./types";
 
 // Auto-initialize when loaded as a script tag
 if (typeof window !== "undefined") {
@@ -7,7 +8,34 @@ if (typeof window !== "undefined") {
   // Initialize on DOM ready
   const init = () => {
     if (!instance) {
-      instance = new KeyOSD();
+      // Read configuration from script tag data attributes
+      const scriptTag = document.currentScript as HTMLScriptElement | null;
+      const options: KeyOSDOptions = {};
+
+      if (scriptTag) {
+        const anchor = scriptTag.dataset.anchor as KeyOSDOptions["anchor"];
+        if (anchor) {
+          options.anchor = anchor;
+        }
+
+        const xOffset = scriptTag.dataset.xOffset;
+        if (xOffset !== undefined) {
+          const parsed = parseInt(xOffset, 10);
+          if (!isNaN(parsed)) {
+            options.xOffset = parsed;
+          }
+        }
+
+        const yOffset = scriptTag.dataset.yOffset;
+        if (yOffset !== undefined) {
+          const parsed = parseInt(yOffset, 10);
+          if (!isNaN(parsed)) {
+            options.yOffset = parsed;
+          }
+        }
+      }
+
+      instance = new KeyOSD(options);
     }
   };
 

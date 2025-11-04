@@ -40,6 +40,39 @@ Just include the standalone script. KeyOSD will automatically initialize:
 <script src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"></script>
 ```
 
+#### Positioning
+
+Configure the overlay position using data attributes on the script tag:
+
+```html
+<!-- Default: bottom-right corner, 16px offset -->
+<script src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"></script>
+
+<!-- Custom position: 215px from right, 4px from bottom -->
+<script
+  src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"
+  data-anchor="bottom-right"
+  data-x-offset="215"
+  data-y-offset="4"
+></script>
+
+<!-- Top-left corner -->
+<script
+  src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"
+  data-anchor="top-left"
+  data-x-offset="20"
+  data-y-offset="20"
+></script>
+```
+
+Available data attributes:
+
+- `data-anchor`: Corner to anchor to. Options: `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"` (default: `"bottom-right"`)
+- `data-x-offset`: Horizontal offset from the anchor edge in pixels (default: `16`)
+- `data-y-offset`: Vertical offset from the anchor edge in pixels (default: `16`)
+
+#### Controlling the Instance
+
 The overlay will appear automatically and start capturing keystrokes. Access the instance via `window.keyosd` if you need to control it:
 
 ```javascript
@@ -72,6 +105,9 @@ import { KeyOSD } from "keyosd";
 const keyosd = new KeyOSD({
   container: document.body, // Container element (default: document.body)
   enabled: true, // Start capturing immediately (default: true)
+  anchor: "bottom-right", // Corner to anchor to (default: "bottom-right")
+  xOffset: 16, // Horizontal offset in pixels (default: 16)
+  yOffset: 16, // Vertical offset in pixels (default: 16)
 });
 ```
 
@@ -123,6 +159,9 @@ keyosd.destroy();
 interface KeyOSDOptions {
   container?: HTMLElement; // Container element (default: document.body)
   enabled?: boolean; // Start enabled (default: true)
+  anchor?: "top-left" | "top-right" | "bottom-left" | "bottom-right"; // Corner to anchor to (default: "bottom-right")
+  xOffset?: number; // Horizontal offset from anchor edge in pixels (default: 16)
+  yOffset?: number; // Vertical offset from anchor edge in pixels (default: 16)
 }
 ```
 

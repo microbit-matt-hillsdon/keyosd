@@ -141,6 +141,9 @@ export class KeyOSD {
     this.options = {
       container: options.container || document.body,
       enabled: options.enabled ?? true,
+      anchor: options.anchor || "bottom-right",
+      xOffset: options.xOffset ?? 16,
+      yOffset: options.yOffset ?? 16,
     };
 
     this.container = this.options.container;
@@ -232,16 +235,54 @@ export class KeyOSD {
     // Try to initialize KeyboardLayoutMap (progressive enhancement)
     await this.initKeyboardLayoutMap();
 
-    // Set initial position to bottom-right with 1rem inset
+    // Set initial position based on anchor and offset options
     // Use clientWidth/clientHeight to exclude scrollbars
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
-    const inset = 16; // 1rem = 16px
-    const x = viewportWidth - inset - 100; // 100px is half the overlay width (200px)
-    const y = viewportHeight - inset - 50; // 50px is half the overlay height (~100px)
+    const overlayHalfWidth = 100; // Half of 200px overlay width
+    const overlayHalfHeight = 50; // Half of ~100px overlay height
+
+    let x: number, y: number;
+
+    this.anchorCorner = this.options.anchor;
+
+    switch (this.options.anchor) {
+      case "top-left":
+        x = this.options.xOffset + overlayHalfWidth;
+        y = this.options.yOffset + overlayHalfHeight;
+        this.anchorOffset = {
+          x: this.options.xOffset + overlayHalfWidth,
+          y: this.options.yOffset + overlayHalfHeight,
+        };
+        break;
+      case "top-right":
+        x = viewportWidth - this.options.xOffset - overlayHalfWidth;
+        y = this.options.yOffset + overlayHalfHeight;
+        this.anchorOffset = {
+          x: this.options.xOffset + overlayHalfWidth,
+          y: this.options.yOffset + overlayHalfHeight,
+        };
+        break;
+      case "bottom-left":
+        x = this.options.xOffset + overlayHalfWidth;
+        y = viewportHeight - this.options.yOffset - overlayHalfHeight;
+        this.anchorOffset = {
+          x: this.options.xOffset + overlayHalfWidth,
+          y: this.options.yOffset + overlayHalfHeight,
+        };
+        break;
+      case "bottom-right":
+      default:
+        x = viewportWidth - this.options.xOffset - overlayHalfWidth;
+        y = viewportHeight - this.options.yOffset - overlayHalfHeight;
+        this.anchorOffset = {
+          x: this.options.xOffset + overlayHalfWidth,
+          y: this.options.yOffset + overlayHalfHeight,
+        };
+        break;
+    }
+
     this.setPosition(x, y);
-    this.anchorCorner = "bottom-right";
-    this.anchorOffset = { x: inset + 100, y: inset + 50 };
 
     // Add event listeners
     if (this.options.enabled) {
