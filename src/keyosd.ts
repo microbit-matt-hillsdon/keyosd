@@ -120,6 +120,10 @@ export class KeyOSD {
   private keyboardLayoutMap: any = null; // KeyboardLayoutMap (if available)
   private boundKeyDownHandler: (e: KeyboardEvent) => void;
   private boundKeyUpHandler: (e: KeyboardEvent) => void;
+  private keyUpDownEventOptions = {
+    capture: true,
+    passive: true,
+  };
   private boundMouseDownHandler: (e: MouseEvent) => void;
   private boundMouseMoveHandler: (e: MouseEvent) => void;
   private boundMouseUpHandler: () => void;
@@ -699,16 +703,32 @@ export class KeyOSD {
   public enable(): void {
     this.options.enabled = true;
     this.overlay.style.display = "";
-    document.addEventListener("keydown", this.boundKeyDownHandler);
-    document.addEventListener("keyup", this.boundKeyUpHandler);
+    document.addEventListener(
+      "keydown",
+      this.boundKeyDownHandler,
+      this.keyUpDownEventOptions
+    );
+    document.addEventListener(
+      "keyup",
+      this.boundKeyUpHandler,
+      this.keyUpDownEventOptions
+    );
   }
 
   public disable(): void {
     this.options.enabled = false;
     this.clear();
     this.overlay.style.display = "none";
-    document.removeEventListener("keydown", this.boundKeyDownHandler);
-    document.removeEventListener("keyup", this.boundKeyUpHandler);
+    document.removeEventListener(
+      "keydown",
+      this.boundKeyDownHandler,
+      this.keyUpDownEventOptions
+    );
+    document.removeEventListener(
+      "keyup",
+      this.boundKeyUpHandler,
+      this.keyUpDownEventOptions
+    );
   }
 
   public destroy(): void {
