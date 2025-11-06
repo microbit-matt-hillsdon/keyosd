@@ -411,9 +411,6 @@ export class KeyOSD {
 
     this.updateModifierDisplay();
 
-    // Ignore key repeats
-    if (e.repeat) return;
-
     const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
 
     let key: string;
