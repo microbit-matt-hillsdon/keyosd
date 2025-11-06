@@ -17,6 +17,22 @@ You can integrate it in your app or user testing environment with a simple scrip
 - Compact visualization inspired by [KeyCastr](https://github.com/keycastr/keycastr)'s Svelte-mode
 - Draggable to move away from user interface elements as needed
 
+## Limitations
+
+### Mobile platforms
+
+KeyOSD relies on browser keyboard events (`keydown`/`keyup`) which are not consistently fired by virtual/on-screen keyboards on mobile devices. This means you may not see key output when typing on phones or tablets in inputs or contenteditable elements.
+
+### Keyboard layout support
+
+Browser key events expose a key `code` in terms of a US ASCII QWERTY keyboard and a `key` property that exposes the resulting character.
+
+Generally it's preferable to use `key`. But this presents a challenge with shortcuts like Option+C for which the key is `ç` but you might reasonably expect to see ⌥C.
+
+So, for normal typing we use `key`. When modifiers are used, we use `code` then map it to the corresponding key using [KeyboardLayoutMap](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardLayoutMap) when available, otherwise a QWERTY-specific default mapping.
+
+There might be a better compromise position here and feedback is welcome from users with international or non-QWERTY layouts.
+
 ## Usage
 
 ### Bookmarklet
@@ -31,10 +47,9 @@ Note you might hit [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guide
 
 **⚠️ This runs JavaScript from this project with full access to your current browser tab**
 
-
 ### Script tag
 
-Just include the script. KeyOSD will automatically initialize:
+Include the script in your HTML file. KeyOSD will automatically initialize:
 
 ```html
 <script src="https://microbit-matt-hillsdon.github.io/keyosd/v0/keyosd.js"></script>
@@ -162,16 +177,6 @@ interface KeyOSDOptions {
   yOffset?: number; // Vertical offset from anchor edge in pixels (default: 16)
 }
 ```
-
-## Keyboard layout support
-
-Browsers key events expose a key `code` in terms of a US ASCII QWERTY keyboard and a `key` property that exposes the resulting character.
-
-Generally it's preferable to use `key`. But this presents a challenge with shortcuts like Option+C for which the key is `ç` but you might reasonably expect to see ⌥C.
-
-So, for normal typing we use `key`. When modifiers are used, we use `code` then map it to the corresponding key using [KeyboardLayoutMap](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardLayoutMap) when available, otherwise a QWERTY-specific default mapping.
-
-There might be a better compromise position here and feedback is welcome from users with international or non-QWERTY layouts.
 
 ## Development
 
